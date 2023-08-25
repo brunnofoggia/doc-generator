@@ -1,0 +1,84 @@
+import { DataSource } from 'typeorm';
+import { faker } from '@faker-js/faker';
+import { sleep } from 'node-common/dist/utils';
+
+import { DatabaseConnect } from '@test/utils/connect';
+import { projectUid, templateConfigList } from '@test/mock/entities/templateConfig';
+import { TemplateService } from '@test/services/template.service';
+import { TemplateConfigService } from '@test/services/templateConfig.service';
+import { TemplateContentService } from '@test/services/templateContent.service';
+import { templateRecursiveHtml, templateSingleHtml } from '@test/mock/entities/template';
+import { getServices } from '@test/utils/prepareData';
+import { getError } from 'utils';
+import { DocGeneratorErrorType } from '../types/error';
+import { TemplateDomain } from '../domain/Template';
+import { TemplateGenerator } from 'templates/template.abstract';
+import { TemplateConfigInterface, TemplateContentInterface } from 'interfaces/entities';
+import { HtmlGenerator } from './html';
+import { TextStreamUtil } from 'cloud-solutions/dist/local/storage/textStreamUtil';
+import { userFetchFn, userHeader, userList } from '@test/mock/data/user';
+
+describe('Domain > DocGenDomain', () => {
+    let conn: DataSource;
+    let templateService: TemplateService;
+    let templateConfigService: TemplateConfigService;
+    let templateContentService: TemplateContentService;
+    let templateConfig: TemplateConfigInterface;
+    let contents: TemplateContentInterface[];
+    let templates: HtmlGenerator[];
+    const configRelations = {
+        template: 'template',
+        contents: 'templateContents',
+    };
+    const databaseConfig = {
+        configRelations,
+        contentParentId: 'templateContentId',
+        contentName: 'name',
+    };
+
+    let templateDomain: TemplateDomain;
+    const defaultTemplateWhere = {
+        projectUid,
+        templateUid: templateRecursiveHtml.uid,
+    };
+
+    beforeAll(async () => {
+        conn = await DatabaseConnect();
+        const services = getServices(conn);
+        templateService = services.templateService;
+        templateConfigService = services.templateConfigService;
+        templateContentService = services.templateContentService;
+
+        templateDomain = new TemplateDomain({
+            templateService,
+            templateConfigService,
+            templateContentService,
+            database: databaseConfig,
+        });
+    });
+
+    beforeEach(async () => {
+        const templateWhere = { ...defaultTemplateWhere };
+        templateDomain.setOptions({ templateWhere });
+        templateConfig = await templateDomain.findTemplateConfig();
+        contents = templateDomain.normalizeTemplateContents(templateConfig.templateContents);
+        templates = templateDomain.buildChainOfTemplates(templateDomain.templatesFactory(contents, {})) as HtmlGenerator[];
+    });
+
+    describe('generate all', () => {
+        it('generating multiple recursive templates', async () => {
+            expect.assertions(1);
+
+            const stream = new TextStreamUtil();
+
+            const input: any = {};
+            input.title = 'ASYNC';
+
+            input.header = userHeader;
+            input.rows = userFetchFn();
+
+            await templateDomain.generateAll(templates, input, stream);
+            expect(stream.getContent().length).toBeGreaterThan(0);
+        });
+    });
+});
