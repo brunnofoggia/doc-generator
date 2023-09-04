@@ -195,7 +195,7 @@ describe('Domain > DocGenDomain', () => {
             const totalTemplates = normalizedContents.length;
 
             const templates = getTemplateGeneratorsFromContents({ templateDomain, normalizedContents });
-            const organizedTemplates = templateDomain.buildChainOfTemplates(templates);
+            const organizedTemplates = templateDomain.buildTemplatesTree(templates);
 
             let onlyParentsInsideRoot = true;
             let countTemplates = 0;
@@ -227,7 +227,7 @@ describe('Domain > DocGenDomain', () => {
         it('validating multiple recursive templates', async () => {
             expect.assertions(1);
 
-            const templates = templateDomain.buildChainOfTemplates(
+            const templates = templateDomain.buildTemplatesTree(
                 await getTemplateGenerators({
                     templateDomain,
                     defaultTemplateWhere,
@@ -257,7 +257,7 @@ describe('Domain > DocGenDomain', () => {
 
         it('generating multiple recursive html templates', async () => {
             expect.assertions(3);
-            const templates = templateDomain.buildChainOfTemplates(
+            const templates = templateDomain.buildTemplatesTree(
                 await getTemplateGenerators({
                     templateDomain,
                     defaultTemplateWhere,
@@ -277,7 +277,7 @@ describe('Domain > DocGenDomain', () => {
 
         it('generating multiple recursive csv templates', async () => {
             expect.assertions(2);
-            const templates = templateDomain.buildChainOfTemplates(
+            const templates = templateDomain.buildTemplatesTree(
                 await getTemplateGenerators({
                     templateDomain,
                     defaultTemplateWhere,

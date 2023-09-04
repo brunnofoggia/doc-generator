@@ -1,6 +1,11 @@
 export enum DocGeneratorErrorType {
     NO_WHERE,
     NO_CONFIG,
+    BUILD_TEMPLATES_FIRST,
     NO_STREAM,
+    NO_FILESYSTEM,
+    NO_FILE_BASEDIR,
+    NO_FILE_DIRPATH,
+    NO_STREAM_FILEPATH,
     INCOMPATIBLE_STREAM,
 }

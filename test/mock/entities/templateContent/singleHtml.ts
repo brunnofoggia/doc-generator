@@ -11,7 +11,9 @@ export const contentSingleHtml: TemplateContentEntity = {
     },
     options: {},
     content: `
-        <h1>HTML</h1>
-        <div><%=data.title%></div>
+    <html><head></head><body>
+        <h1 style="color: #000; fonte-size: 20px;">HTML</h1>
+        <div style="color: #000; fonte-size: 20px;"><%=data.title%></div>
+    </body></html>
     `,
 };

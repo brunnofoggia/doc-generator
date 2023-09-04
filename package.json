@@ -14,7 +14,7 @@
         "lint": "eslint \"{src,apps,libs}/**/*.+(js|json|ts|tsx)\" --fix",
         "pre-commit": "lint-staged",
         "prepare": "npm run build",
-        "test": "npm run test:docker:up && npm run test:run && npm run test:docker:down",
+        "test": "npm run test:docker:up && npm run test:run",
         "test:run": "NODE_OPTIONS=--experimental-vm-modules npx jest --verbose --detectOpenHandles",
         "test:docker:up": "docker compose up -d",
         "test:docker:down": "docker compose down"
@@ -50,7 +50,9 @@
         "cloud-solutions": "github:brunnofoggia/cloud-solutions",
         "ejs": "^3.1.9",
         "lodash": "^4.17.21",
-        "node-common": "github:brunnofoggia/node-common"
+        "node-common": "github:brunnofoggia/node-common",
+        "puppeteer": "^21.1.1",
+        "uuid": "^9.0.0"
     },
     "files": [
         "/lib"

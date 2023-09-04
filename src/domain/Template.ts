@@ -10,18 +10,9 @@ import { error } from 'utils';
 import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
 import { ObjectLiteral } from 'typeorm';
 import { CsvGenerator } from 'templates/csv';
+import { DomainOptionsUtil } from 'utils/DomainOptions';
 
-export class TemplateDomain {
-    protected options: Partial<DomainOptions> = {};
-
-    constructor(options: Partial<DomainOptions>) {
-        this.setOptions(options);
-    }
-
-    setOptions(options: Partial<DomainOptions>) {
-        each(options, (value, index) => (this.options[index] = value));
-    }
-
+export class TemplateDomain extends DomainOptionsUtil {
     async findTemplateConfig(): Promise<TemplateConfigInterface> {
         if (!size(this.options.templateWhere)) error(DocGeneratorErrorType.NO_WHERE);
 
@@ -79,7 +70,7 @@ export class TemplateDomain {
         return map(contents, (content) => this.templateFactory(content, globalConfig));
     }
 
-    buildChainOfTemplates(templates: TemplateGenerator[]) {
+    buildTemplatesTree(templates: TemplateGenerator[]) {
         const templatesIndexed = this.keyByIdTemplates(templates);
         return (
             chain(templatesIndexed)

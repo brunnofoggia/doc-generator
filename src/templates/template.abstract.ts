@@ -88,10 +88,10 @@ export abstract class TemplateGenerator {
         !data.calculator && (data.calculator = {});
 
         for (const child of this.children) {
-            const output = await this.generateWithOutput(child, data, stream, outputs);
+            await this.generateWithOutput(child, data, stream, outputs);
         }
 
-        const output = await this.generateWithOutput(this, data, stream, outputs);
+        await this.generateWithOutput(this, data, stream, outputs);
         return outputs;
     }
 

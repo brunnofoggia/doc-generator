@@ -62,7 +62,7 @@ describe('Domain > DocGenDomain', () => {
         templateDomain.setOptions({ templateWhere });
         templateConfig = await templateDomain.findTemplateConfig();
         contents = templateDomain.normalizeTemplateContents(templateConfig.templateContents);
-        templates = templateDomain.buildChainOfTemplates(templateDomain.templatesFactory(contents, {})) as HtmlGenerator[];
+        templates = templateDomain.buildTemplatesTree(templateDomain.templatesFactory(contents, {})) as HtmlGenerator[];
     });
 
     describe('generate all', () => {

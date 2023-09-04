@@ -1,20 +1,32 @@
-import { CrudService } from 'node-common/dist/services/crud.service';
 import { TemplateGenerator } from 'templates/template.abstract';
 import { FindOptionsWhere, ObjectLiteral } from 'typeorm';
 import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
 
+export interface FileOptions {
+    fileSystem?: FileSystem;
+    stream?: WriteStreamInterface;
+
+    baseDir?: string;
+    dirPath?: string;
+    filePath?: string;
+}
+
+export interface Files extends FileOptions {
+    generate?: FileOptions;
+    output?: FileOptions;
+}
+
 export interface DomainOptions {
-    // TODO: substituir tipo CrudService  por objeto que contenha os metodos necessarios
-    templateService: CrudService<ObjectLiteral>;
-    templateConfigService: CrudService<ObjectLiteral>;
-    templateContentService: CrudService<ObjectLiteral>;
+    templateService: Service;
+    templateConfigService: Service;
+    templateContentService: Service;
     templateWhere: FindOptionsWhere<ObjectLiteral>;
-    stream: WriteStreamInterface;
     database: {
         configRelations: TemplateConfigRelations;
         contentParentId: string;
         contentName: string;
     };
+    file: Files;
 }
 
 export interface TemplateConfigRelations {
@@ -24,4 +36,16 @@ export interface TemplateConfigRelations {
 
 export interface TemplateObjectListInterface {
     [x: string]: TemplateGenerator;
+}
+
+export interface Service {
+    getIdAttribute(): string;
+    find(options?: any): Promise<ObjectLiteral[]>;
+}
+
+export interface FileSystem {
+    readContent(path, options?);
+    sendContent(path, content, options?);
+    readStream(path, options?);
+    sendStream?(path, options?);
 }
