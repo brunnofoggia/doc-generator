@@ -1,12 +1,10 @@
-import { defaultsDeep, each, size, uniqueId } from 'lodash';
+import { defaultsDeep, size } from 'lodash';
 import { DocGeneratorErrorType } from '../types/error';
 import { error } from '../utils';
 import { DomainOptions } from 'interfaces/domain';
 import { TemplateDomain } from './Template';
 import { TemplateGenerator } from 'templates/template.abstract';
 import { DeepPartial, ObjectLiteral } from 'typeorm';
-import { WriteStream } from 'cloud-solutions/dist/common/abstract/writeStream';
-import { Adapters } from 'cloud-solutions';
 import { StreamType } from 'types/stream';
 import { FileDomain } from './File';
 import { DomainOptionsUtil } from 'utils/DomainOptions';
@@ -14,7 +12,7 @@ import { TemplateConfigInterface } from 'interfaces/entities';
 import { OutputDomain } from './Output';
 import { OutputType } from 'types/output';
 
-const getDefaultOptions = (): Partial<DomainOptions> => ({
+const getDefaultOptions = (): DeepPartial<DomainOptions> => ({
     database: {
         configRelations: {
             template: 'template',
@@ -23,7 +21,6 @@ const getDefaultOptions = (): Partial<DomainOptions> => ({
         contentId: 'id',
         contentParentId: 'templateContentId',
         contentName: 'name',
-        find: () => null,
     },
     file: {
         dirPath: 'doc-generator',
