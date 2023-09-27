@@ -1,7 +1,8 @@
-import { OutputGenerator } from './output.abstract';
-import { OutputType } from 'types/output';
 import { cloneDeep, defaultsDeep } from 'lodash';
 import { PDFOptions } from 'puppeteer';
+
+import { OutputGenerator } from './output.abstract';
+import { OutputType } from '../types/output';
 
 // https://pptr.dev/api/puppeteer.pdfoptions
 const defaultConfig: Partial<PDFOptions> = {

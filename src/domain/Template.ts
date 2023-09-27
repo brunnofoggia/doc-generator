@@ -1,16 +1,17 @@
-import { DomainOptions, TemplateObjectListInterface } from 'interfaces/domain';
-import { TemplateConfigInterface, TemplateContentInterface, TemplateContentObjectListInterface, TemplateInterface } from 'interfaces/entities';
 import { chain, each, keyBy, map, size, sortBy } from 'lodash';
-import { HtmlGenerator } from 'templates/html';
-import { TemplateGenerator } from 'templates/template.abstract';
-import { TxtGenerator } from 'templates/txt';
-import { DocGeneratorErrorType } from '../types/error';
-import { TemplateType } from 'types/template';
-import { error } from 'utils';
-import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
 import { ObjectLiteral } from 'typeorm';
-import { CsvGenerator } from 'templates/csv';
-import { DomainOptionsUtil } from 'utils/DomainOptions';
+import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
+
+import { DomainOptions, TemplateObjectListInterface } from '../interfaces/domain';
+import { TemplateConfigInterface, TemplateContentInterface, TemplateContentObjectListInterface, TemplateInterface } from '../interfaces/entities';
+import { TemplateGenerator } from '../templates/template.abstract';
+import { DocGeneratorErrorType } from '../types/error';
+import { TemplateType } from '../types/template';
+import { error } from '../utils';
+import { HtmlGenerator } from '../templates/html';
+import { TxtGenerator } from '../templates/txt';
+import { CsvGenerator } from '../templates/csv';
+import { DomainOptionsUtil } from '../utils/DomainOptions';
 
 export class TemplateDomain extends DomainOptionsUtil {
     async findTemplateConfig(): Promise<TemplateConfigInterface> {

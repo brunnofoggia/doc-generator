@@ -1,10 +1,11 @@
 import { each, uniqueId } from 'lodash';
 import { Adapters } from 'cloud-solutions';
-import { DocGeneratorErrorType } from 'types/error';
-import { StreamType } from 'types/stream';
-import { error } from 'utils';
-import { DomainOptionsUtil } from 'utils/DomainOptions';
 import { v4 as uuidv4 } from 'uuid';
+
+import { DocGeneratorErrorType } from '../types/error';
+import { StreamType } from '../types/stream';
+import { error } from '../utils';
+import { DomainOptionsUtil } from '../utils/DomainOptions';
 
 export class FileDomain extends DomainOptionsUtil {
     async getStream(streamType: StreamType) {

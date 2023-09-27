@@ -1,16 +1,15 @@
 import { defaultsDeep, size } from 'lodash';
-import { DocGeneratorErrorType } from '../types/error';
-import { error } from '../utils';
-import { DomainOptions } from 'interfaces/domain';
-import { TemplateDomain } from './Template';
-import { TemplateGenerator } from 'templates/template.abstract';
 import { DeepPartial, ObjectLiteral } from 'typeorm';
-import { StreamType } from 'types/stream';
+
+import { DomainOptions } from '../interfaces/domain';
+import { TemplateDomain } from './Template';
+import { TemplateGenerator } from '../templates/template.abstract';
+import { StreamType } from '../types/stream';
 import { FileDomain } from './File';
-import { DomainOptionsUtil } from 'utils/DomainOptions';
-import { TemplateConfigInterface } from 'interfaces/entities';
+import { DomainOptionsUtil } from '../utils/DomainOptions';
+import { TemplateConfigInterface } from '../interfaces/entities';
 import { OutputDomain } from './Output';
-import { OutputType } from 'types/output';
+import { OutputType } from '../types/output';
 
 const getDefaultOptions = (): DeepPartial<DomainOptions> => ({
     database: {
@@ -56,14 +55,16 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
     }
 
     async buildTemplatesList() {
-        await this.setTemplateConfig();
+        if (!this.templates) {
+            await this.setTemplateConfig();
 
-        this.templates = this.domain.template.buildTemplatesTree(
-            this.domain.template.templatesFactory(
-                this.domain.template.normalizeTemplateContents(this.domain.template.getContents(this.templateConfig)),
-                this.globalConfig,
-            ),
-        );
+            this.templates = this.domain.template.buildTemplatesTree(
+                this.domain.template.templatesFactory(
+                    this.domain.template.normalizeTemplateContents(this.domain.template.getContents(this.templateConfig)),
+                    this.globalConfig,
+                ),
+            );
+        }
         return this;
     }
 
@@ -79,12 +80,13 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
         return this.templateConfig;
     }
 
-    buildGlobalConfig(customOptions: any = {}) {
-        const template = this.domain.template.getTemplateRoot(this.templateConfig);
-        this.globalConfig = defaultsDeep(customOptions, this.templateConfig.config, template.defaultConfig);
+    buildGlobalConfig(customOptions: any = {}, replace = false) {
+        if (!this.globalConfig || replace) {
+            const template = this.domain.template.getTemplateRoot(this.templateConfig);
+            this.globalConfig = defaultsDeep(customOptions, this.templateConfig.config, template.defaultConfig);
 
-        this.domain.output.setConfig(this.globalConfig);
-
+            this.domain.output.setConfig(this.globalConfig);
+        }
         return this.globalConfig;
     }
 
@@ -94,7 +96,8 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
     }
 
     async generate(data) {
-        if (!this.templateConfig) error(DocGeneratorErrorType.BUILD_TEMPLATES_FIRST);
+        await this.buildTemplatesList();
+        await this.validateTemplates();
         // if (stream) this.options.stream = stream;
         // if (!this.options.stream) error(DocGeneratorErrorType.NO_STREAM);
         // if (!(this.options.stream instanceof WriteStream)) error(DocGeneratorErrorType.INCOMPATIBLE_STREAM);

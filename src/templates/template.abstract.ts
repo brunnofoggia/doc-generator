@@ -1,7 +1,8 @@
-import { TemplateContentInterface } from 'interfaces/entities';
-import { TemplateType } from 'types/template';
 import { each, sortBy } from 'lodash';
 import { ObjectLiteral } from 'typeorm';
+
+import { TemplateContentInterface } from '../interfaces/entities';
+import { TemplateType } from '../types/template';
 
 export interface TemplateGeneratorSetup {
     data: TemplateContentInterface;

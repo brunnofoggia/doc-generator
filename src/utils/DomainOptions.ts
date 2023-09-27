@@ -1,5 +1,6 @@
 import { cloneDeep, defaultsDeep, each } from 'lodash';
 import { DeepPartial } from 'typeorm';
+
 import { DomainOptions } from '../interfaces/domain';
 
 export abstract class DomainOptionsUtil {

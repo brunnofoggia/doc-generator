@@ -74,28 +74,19 @@ describe('Domain > DocGenerator', () => {
         });
     });
 
-    describe('generate', () => {
-        // it('build templates before generate', async () => {
-        //     expect.assertions(1);
-        //     await expect(domain.generate({})).rejects.toThrowError(getError(DocGeneratorErrorType.BUILD_TEMPLATES_FIRST));
-        // });
-    });
-
     describe('output', () => {
-        // it('generate plain html and output', async () => {
-        //     expect.assertions(1);
+        it('generate plain html and output', async () => {
+            expect.assertions(1);
 
-        //     const title = uniqueId(uniqueName);
-        //     await domain.buildTemplatesList();
-        //     await domain.validateTemplates();
-        //     await domain.generate({ title });
-        //     const content = await domain.getGenerateContent();
+            const title = uniqueId(uniqueName);
+            await domain.generate({ title });
+            const content = await domain.getGenerateContent();
 
-        //     expect(content.indexOf(title)).toBeGreaterThan(0);
-        // });
+            expect(content.indexOf(title)).toBeGreaterThan(0);
+        });
 
         it('generate plain html and converto to pdf', async () => {
-            // expect.assertions(1);
+            expect.assertions(1);
 
             const title = [uniqueId(uniqueName), new Date().toISOString()].join('-');
             await domain.buildTemplatesList();
@@ -118,7 +109,7 @@ describe('Domain > DocGenerator', () => {
             const content = await domain.getGenerateContent();
             await domain.output();
 
-            // expect(content.indexOf(title)).toBeGreaterThan(0);
+            expect(content.indexOf(title)).toBeGreaterThan(0);
         });
     });
 });

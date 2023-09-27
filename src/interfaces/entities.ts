@@ -1,5 +1,6 @@
 import { ObjectLiteral } from 'typeorm';
-import { TemplateType } from 'types/template';
+
+import { TemplateType } from '../types/template';
 
 export interface TemplateInterface {
     uid: string;

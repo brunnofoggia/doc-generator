@@ -1,8 +1,8 @@
 import ejs from 'ejs';
+import { defaults } from 'lodash';
 import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
 
 import { TemplateGenerator } from './template.abstract';
-import { defaults } from 'lodash';
 
 export abstract class ContentGenerator extends TemplateGenerator {
     protected compiled: any;

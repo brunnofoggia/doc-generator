@@ -1,8 +1,8 @@
-import { DomainOptionsUtil } from 'utils/DomainOptions';
-import { OutputType } from 'types/output';
-import { PdfGenerator } from 'outputs/pdf';
-import { PlainGenerator } from 'outputs/plain';
-import { OutputGenerator } from 'outputs/output.abstract';
+import { DomainOptionsUtil } from '../utils/DomainOptions';
+import { OutputType } from '../types/output';
+import { PdfGenerator } from '../outputs/pdf';
+import { PlainGenerator } from '../outputs/plain';
+import { OutputGenerator } from '../outputs/output.abstract';
 
 interface OutputConfig {
     outputType: OutputType;

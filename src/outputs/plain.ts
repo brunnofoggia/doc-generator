@@ -1,5 +1,5 @@
 import { OutputGenerator } from './output.abstract';
-import { OutputType } from 'types/output';
+import { OutputType } from '../types/output';
 
 export class PlainGenerator extends OutputGenerator {
     protected readonly baseType = OutputType.PLAIN;

@@ -1,4 +1,4 @@
-import { TemplateType } from 'types/template';
+import { TemplateType } from '../types/template';
 import { ContentGenerator } from './content.abstract';
 
 export class HtmlGenerator extends ContentGenerator {

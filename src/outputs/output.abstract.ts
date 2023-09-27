@@ -1,4 +1,4 @@
-import { OutputType } from 'types/output';
+import { OutputType } from '../types/output';
 
 export abstract class OutputGenerator {
     protected abstract baseType: OutputType;

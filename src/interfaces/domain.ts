@@ -1,6 +1,7 @@
-import { TemplateGenerator } from 'templates/template.abstract';
 import { FindOptionsWhere, ObjectLiteral } from 'typeorm';
 import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
+
+import { TemplateGenerator } from '../templates/template.abstract';
 
 export interface FileOptions {
     fileSystem?: FileSystem;
