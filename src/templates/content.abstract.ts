@@ -29,7 +29,7 @@ export abstract class ContentGenerator extends TemplateGenerator {
         const seeder = input.data.seeder[this.getName()] || this.buildSeeder();
         const calculator = input.data.calculator[this.getName()] || ((f) => f);
 
-        while ((input.feed = await seeder())) {
+        while ((input.feed = await seeder(input))) {
             const rendered = await this.render(input);
             await stream.writeLine(rendered);
             await calculator(input);
