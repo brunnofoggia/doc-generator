@@ -1,5 +1,4 @@
 export enum DocGeneratorErrorType {
-    NO_WHERE,
     NO_CONFIG,
     BUILD_TEMPLATES_FIRST,
     NO_STREAM,

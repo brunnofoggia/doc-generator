@@ -1,22 +1,23 @@
 import { cloneDeep, defaultsDeep, each } from 'lodash';
+import { DeepPartial } from 'typeorm';
 import { DomainOptions } from '../interfaces/domain';
 
 export abstract class DomainOptionsUtil {
-    protected options: Partial<DomainOptions> = {};
+    protected options: DeepPartial<DomainOptions> = {};
     protected domain: any = {};
 
-    constructor(options: Partial<DomainOptions> = {}, defaultOptions: Partial<DomainOptions> = {}) {
+    constructor(options: DeepPartial<DomainOptions> = {}, defaultOptions: DeepPartial<DomainOptions> = {}) {
         this.setChild();
         this.options = cloneDeep(defaultOptions);
         this.setOptions(options);
     }
 
-    copyOfOptions(_options: Partial<DomainOptions>) {
+    copyOfOptions(_options: DeepPartial<DomainOptions>) {
         this.options = _options;
         this.setChildCopyOfOptions(this.getChild(), this.options);
     }
 
-    setOptions(_options: Partial<DomainOptions>) {
+    setOptions(_options: DeepPartial<DomainOptions>) {
         this.options = defaultsDeep({}, _options, this.options);
         this.setChildCopyOfOptions(this.getChild(), this.options);
     }
@@ -29,7 +30,7 @@ export abstract class DomainOptionsUtil {
         return this.domain;
     }
 
-    setChildCopyOfOptions(childList: any[], _options: Partial<DomainOptions>) {
+    setChildCopyOfOptions(childList: any[], _options: DeepPartial<DomainOptions>) {
         each(childList, (child) => child.copyOfOptions(_options));
     }
 }

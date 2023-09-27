@@ -4,7 +4,7 @@ import { error } from '../utils';
 import { DomainOptions } from 'interfaces/domain';
 import { TemplateDomain } from './Template';
 import { TemplateGenerator } from 'templates/template.abstract';
-import { ObjectLiteral } from 'typeorm';
+import { DeepPartial, ObjectLiteral } from 'typeorm';
 import { WriteStream } from 'cloud-solutions/dist/common/abstract/writeStream';
 import { Adapters } from 'cloud-solutions';
 import { StreamType } from 'types/stream';
@@ -20,8 +20,10 @@ const getDefaultOptions = (): Partial<DomainOptions> => ({
             template: 'template',
             contents: 'templateContents',
         },
+        contentId: 'id',
         contentParentId: 'templateContentId',
         contentName: 'name',
+        find: () => null,
     },
     file: {
         dirPath: 'doc-generator',
@@ -41,7 +43,7 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
 
     globalConfig: ObjectLiteral;
 
-    constructor(options: Partial<DomainOptions>) {
+    constructor(options: DeepPartial<DomainOptions>) {
         super(options, getDefaultOptions());
     }
 

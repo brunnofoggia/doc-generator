@@ -16,6 +16,7 @@ import { TemplateGenerator } from 'templates/template.abstract';
 import { TemplateConfigInterface, TemplateContentInterface } from 'interfaces/entities';
 import { HtmlGenerator } from './html';
 import { userFetchFn } from '@test/mock/data/user';
+import { findCook } from 'domain/Template.test';
 
 describe('Domain > DocGenDomain', () => {
     let conn: DataSource;
@@ -29,8 +30,9 @@ describe('Domain > DocGenDomain', () => {
         template: 'template',
         contents: 'templateContents',
     };
-    const databaseConfig = {
+    const databaseConfig: any = {
         configRelations,
+        contentId: 'id',
         contentParentId: 'templateContentId',
         contentName: 'name',
     };
@@ -48,17 +50,14 @@ describe('Domain > DocGenDomain', () => {
         templateConfigService = services.templateConfigService;
         templateContentService = services.templateContentService;
 
+        const templateWhere = { ...defaultTemplateWhere };
+        databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere);
         domain = new TemplateDomain({
-            templateService,
-            templateConfigService,
-            templateContentService,
             database: databaseConfig,
         });
     });
 
     beforeEach(async () => {
-        const templateWhere = { ...defaultTemplateWhere };
-        domain.setOptions({ templateWhere });
         templateConfig = await domain.findTemplateConfig();
         contents = domain.normalizeTemplateContents([templateConfig.templateContents[0]]);
         template = domain.templateFactory(contents[0], {}) as HtmlGenerator;

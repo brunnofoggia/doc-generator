@@ -16,16 +16,21 @@ export interface Files extends FileOptions {
     output?: FileOptions;
 }
 
+export interface DatabaseOptions {
+    find: any;
+    configRelations: TemplateConfigRelations;
+    contentId: string;
+    contentParentId: string;
+    contentName: string;
+}
+
 export interface DomainOptions {
-    templateService: Service;
-    templateConfigService: Service;
-    templateContentService: Service;
-    templateWhere: FindOptionsWhere<ObjectLiteral>;
-    database: {
-        configRelations: TemplateConfigRelations;
-        contentParentId: string;
-        contentName: string;
-    };
+    // templateService: Service;
+    // templateConfigService: Service;
+    // templateContentService: Service;
+    // templateWhere: FindOptionsWhere<ObjectLiteral>;
+
+    database: DatabaseOptions;
     file: Files;
 }
 

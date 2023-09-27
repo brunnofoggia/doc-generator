@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { each, size, isArray } from 'lodash';
+import { each, size, isArray, defaultsDeep } from 'lodash';
 import { TextStreamUtil } from 'cloud-solutions/dist/local/storage/textStreamUtil';
 
 import { DatabaseConnect } from '@test/utils/connect';
@@ -14,7 +14,7 @@ import { getError } from 'utils';
 import { DocGeneratorErrorType } from '../types/error';
 import { TemplateDomain } from './Template';
 import { TemplateGenerator } from 'templates/template.abstract';
-import { getNormalizedContents, getTemplateGenerators, getTemplateGeneratorsFromContents } from './Template.test';
+import { findCook, getNormalizedContents, getTemplateGenerators, getTemplateGeneratorsFromContents } from './Template.test';
 import { userFetchFn, userHeader } from '@test/mock/data/user';
 
 describe('Domain > DocGenDomain', () => {
@@ -22,12 +22,14 @@ describe('Domain > DocGenDomain', () => {
     let templateService: TemplateService;
     let templateConfigService: TemplateConfigService;
     let templateContentService: TemplateContentService;
+
     const configRelations = {
         template: 'template',
         contents: 'templateContents',
     };
-    const databaseConfig = {
+    const databaseConfig: any = {
         configRelations,
+        contentId: 'id',
         contentParentId: 'templateContentId',
         contentName: 'name',
     };
@@ -43,19 +45,18 @@ describe('Domain > DocGenDomain', () => {
         templateService = services.templateService;
         templateConfigService = services.templateConfigService;
         templateContentService = services.templateContentService;
+        const templateWhere = { ...defaultTemplateWhere };
 
+        databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere);
         templateDomain = new TemplateDomain({
-            templateService,
-            templateConfigService,
-            templateContentService,
             database: databaseConfig,
         });
     });
 
-    beforeEach(() => {
-        const templateWhere = { ...defaultTemplateWhere };
-        templateDomain.setOptions({ templateWhere });
-    });
+    // beforeEach(() => {
+    //     const templateWhere = { ...defaultTemplateWhere };
+    //     templateDomain.setOptions({ templateWhere });
+    // });
 
     describe('variables and data ready', () => {
         it('database connected', () => {
@@ -89,20 +90,13 @@ describe('Domain > DocGenDomain', () => {
     });
 
     describe('finding config and content data from tables', () => {
-        it('no conditions set for finding template', async () => {
-            expect.assertions(1);
-
-            const templateWhere = {};
-            templateDomain.setOptions({ templateWhere });
-
-            await expect(templateDomain.findTemplateConfig()).rejects.toThrowError(getError(DocGeneratorErrorType.NO_WHERE));
-        });
-
         it('template config not found', async () => {
             expect.assertions(1);
 
-            const templateWhere = { ...defaultTemplateWhere, templateUid: 'xxx' };
-            templateDomain.setOptions({ templateWhere });
+            databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere, 'xxx');
+            templateDomain.setOptions({ database: databaseConfig });
+            // const templateWhere = { ...defaultTemplateWhere, templateUid: 'xxx' };
+            // templateDomain.setOptions({ templateWhere });
 
             await expect(templateDomain.findTemplateConfig()).rejects.toThrowError(getError(DocGeneratorErrorType.NO_CONFIG));
         });
@@ -110,8 +104,10 @@ describe('Domain > DocGenDomain', () => {
         it('find one template config', async () => {
             expect.assertions(1);
 
-            const templateWhere = { ...defaultTemplateWhere, templateUid: templateSingleHtml.uid };
-            templateDomain.setOptions({ templateWhere });
+            databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere, templateSingleHtml.uid);
+            templateDomain.setOptions({ database: databaseConfig });
+            // const templateWhere = { ...defaultTemplateWhere, templateUid: templateSingleHtml.uid };
+            // templateDomain.setOptions({ templateWhere });
             const result = await templateDomain.findTemplateConfig();
 
             expect(size(result)).toBeGreaterThanOrEqual(1);
@@ -124,6 +120,7 @@ describe('Domain > DocGenDomain', () => {
 
             const normalizedContents = await getNormalizedContents({
                 templateDomain,
+                templateConfigService,
                 defaultTemplateWhere,
                 templateUid: templateRecursiveHtml.uid,
             });
@@ -138,8 +135,11 @@ describe('Domain > DocGenDomain', () => {
         it('key contents by id', async () => {
             expect.assertions(1);
 
-            const templateWhere = { ...defaultTemplateWhere, templateUid: templateRecursiveHtml.uid };
-            templateDomain.setOptions({ templateWhere });
+            databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere, templateRecursiveHtml.uid);
+            templateDomain.setOptions({ database: databaseConfig });
+            // const templateWhere = { ...defaultTemplateWhere, templateUid: templateRecursiveHtml.uid };
+            // templateDomain.setOptions({ templateWhere });
+
             const templateConfig = await templateDomain.findTemplateConfig();
             const contents = templateDomain.keyByIdTemplateContents(templateConfig.templateContents);
 
@@ -157,6 +157,7 @@ describe('Domain > DocGenDomain', () => {
 
             const normalizedContents = await getNormalizedContents({
                 templateDomain,
+                templateConfigService,
                 defaultTemplateWhere,
                 templateUid: templateRecursiveHtml.uid,
             });
@@ -171,6 +172,7 @@ describe('Domain > DocGenDomain', () => {
 
             const templates = await getTemplateGenerators({
                 templateDomain,
+                templateConfigService,
                 defaultTemplateWhere,
                 templateUid: templateRecursiveHtml.uid,
             });
@@ -189,6 +191,7 @@ describe('Domain > DocGenDomain', () => {
 
             const normalizedContents = await getNormalizedContents({
                 templateDomain,
+                templateConfigService,
                 defaultTemplateWhere,
                 templateUid: templateRecursiveHtml.uid,
             });
@@ -217,6 +220,7 @@ describe('Domain > DocGenDomain', () => {
 
             const templates = await getTemplateGenerators({
                 templateDomain,
+                templateConfigService,
                 defaultTemplateWhere,
                 templateUid: templateMultipleHtml.uid,
             });
@@ -230,6 +234,7 @@ describe('Domain > DocGenDomain', () => {
             const templates = templateDomain.buildTemplatesTree(
                 await getTemplateGenerators({
                     templateDomain,
+                    templateConfigService,
                     defaultTemplateWhere,
                     templateUid: templateRecursiveHtml.uid,
                 }),
@@ -245,6 +250,7 @@ describe('Domain > DocGenDomain', () => {
 
             const templates = await getTemplateGenerators({
                 templateDomain,
+                templateConfigService,
                 defaultTemplateWhere,
                 templateUid: templateMultipleHtml.uid,
             });
@@ -260,6 +266,7 @@ describe('Domain > DocGenDomain', () => {
             const templates = templateDomain.buildTemplatesTree(
                 await getTemplateGenerators({
                     templateDomain,
+                    templateConfigService,
                     defaultTemplateWhere,
                     templateUid: templateRecursiveHtml.uid,
                 }),
@@ -280,6 +287,7 @@ describe('Domain > DocGenDomain', () => {
             const templates = templateDomain.buildTemplatesTree(
                 await getTemplateGenerators({
                     templateDomain,
+                    templateConfigService,
                     defaultTemplateWhere,
                     templateUid: templateMultipleCsv.uid,
                 }),

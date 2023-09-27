@@ -13,6 +13,7 @@ import { DocGeneratorErrorType } from '../types/error';
 import { TemplateGenerator } from 'templates/template.abstract';
 import { DocGeneratorDomain } from './DocGenerator';
 import { OutputType } from 'types/output';
+import { findCook } from './Template.test';
 
 describe('Domain > DocGenerator', () => {
     const uniqueName = 'DocGenerator';
@@ -24,8 +25,9 @@ describe('Domain > DocGenerator', () => {
         template: 'template',
         contents: 'templateContents',
     };
-    const databaseConfig = {
+    const databaseConfig: any = {
         configRelations,
+        contentId: 'id',
         contentParentId: 'templateContentId',
         contentName: 'name',
     };
@@ -44,14 +46,10 @@ describe('Domain > DocGenerator', () => {
     });
 
     beforeEach(() => {
+        databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere, templateSingleHtml.uid);
         domain = new DocGeneratorDomain({
-            templateService,
-            templateConfigService,
-            templateContentService,
             database: databaseConfig,
         });
-        const templateWhere = { ...defaultTemplateWhere, templateUid: templateSingleHtml.uid };
-        domain.setOptions({ templateWhere });
     });
 
     describe('variables and data ready', () => {

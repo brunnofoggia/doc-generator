@@ -14,18 +14,9 @@ import { DomainOptionsUtil } from 'utils/DomainOptions';
 
 export class TemplateDomain extends DomainOptionsUtil {
     async findTemplateConfig(): Promise<TemplateConfigInterface> {
-        if (!size(this.options.templateWhere)) error(DocGeneratorErrorType.NO_WHERE);
-
-        const templateConfig = (
-            await this.options.templateConfigService.find({
-                where: this.options.templateWhere,
-                relations: this.buildTemplateConfigRelations(),
-                take: 1,
-            })
-        ).shift();
+        const templateConfig = (await this.options.database.find()).shift();
 
         if (!size(templateConfig)) error(DocGeneratorErrorType.NO_CONFIG);
-
         return templateConfig as TemplateConfigInterface;
     }
 
@@ -135,7 +126,7 @@ export class TemplateDomain extends DomainOptionsUtil {
     }
 
     getContentIdKey() {
-        return this.options.templateContentService.getIdAttribute();
+        return this.options.database.contentId;
     }
 
     getContentNameKey() {

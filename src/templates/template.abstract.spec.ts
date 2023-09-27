@@ -17,6 +17,7 @@ import { TemplateConfigInterface, TemplateContentInterface } from 'interfaces/en
 import { HtmlGenerator } from './html';
 import { TextStreamUtil } from 'cloud-solutions/dist/local/storage/textStreamUtil';
 import { userFetchFn, userHeader, userList } from '@test/mock/data/user';
+import { findCook } from 'domain/Template.test';
 
 describe('Domain > DocGenDomain', () => {
     let conn: DataSource;
@@ -30,8 +31,9 @@ describe('Domain > DocGenDomain', () => {
         template: 'template',
         contents: 'templateContents',
     };
-    const databaseConfig = {
+    const databaseConfig: any = {
         configRelations,
+        contentId: 'id',
         contentParentId: 'templateContentId',
         contentName: 'name',
     };
@@ -49,17 +51,13 @@ describe('Domain > DocGenDomain', () => {
         templateConfigService = services.templateConfigService;
         templateContentService = services.templateContentService;
 
+        databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere);
         templateDomain = new TemplateDomain({
-            templateService,
-            templateConfigService,
-            templateContentService,
             database: databaseConfig,
         });
     });
 
     beforeEach(async () => {
-        const templateWhere = { ...defaultTemplateWhere };
-        templateDomain.setOptions({ templateWhere });
         templateConfig = await templateDomain.findTemplateConfig();
         contents = templateDomain.normalizeTemplateContents(templateConfig.templateContents);
         templates = templateDomain.buildTemplatesTree(templateDomain.templatesFactory(contents, {})) as HtmlGenerator[];

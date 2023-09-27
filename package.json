@@ -1,6 +1,6 @@
 {
     "name": "doc-generator",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "",
     "license": "ISC",
     "author": "Bruno Foggia",
@@ -42,7 +42,6 @@
         "ts-loader": "^9.4.2",
         "ts-node": "^10.9.1",
         "tsconfig-paths": "^3.14.2",
-        "typeorm": "^0.3.17",
         "typescript": "^4.9.5"
     },
     "dependencies": {
@@ -52,6 +51,7 @@
         "lodash": "^4.17.21",
         "node-common": "github:brunnofoggia/node-common",
         "puppeteer": "^21.1.1",
+        "typeorm": "^0.3.17",
         "uuid": "^9.0.0"
     },
     "files": [
