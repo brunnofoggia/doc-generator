@@ -1,5 +1,5 @@
 import ejs from 'ejs';
-import { defaults } from 'lodash';
+import { bind, defaults } from 'lodash';
 import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
 
 import { TemplateGenerator } from './template.abstract';
@@ -26,19 +26,29 @@ export abstract class ContentGenerator extends TemplateGenerator {
     }
 
     async generate(input, stream: WriteStreamInterface) {
-        const seeder = input.data.seeder[this.getName()] || this.buildSeeder();
+        const seeder = input.data.seeder[this.getName()] || this.buildEmptySeeder();
         const calculator = input.data.calculator[this.getName()] || ((f) => f);
 
-        while ((input.feed = await seeder(input))) {
+        await this.loopSeederFn(input, stream, seeder, calculator);
+    }
+
+    async loopSeederFn(input, stream: WriteStreamInterface, seeder, calculator) {
+        const renderer = async (feed = null) => {
+            input.feed = feed;
             const rendered = await this.render(input);
             await stream.writeLine(rendered);
             await calculator(input);
-        }
+        };
+
+        await seeder(input, renderer);
     }
 
-    buildSeeder() {
+    buildEmptySeeder() {
         let count = 0;
-        return () => !count++;
+        return async (input, renderer) => {
+            await renderer();
+            !count++;
+        };
     }
 
     async render(input = {}) {

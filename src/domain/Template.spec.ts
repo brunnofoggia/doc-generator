@@ -283,7 +283,13 @@ describe('Domain > DocGenDomain', () => {
 
             const input: any = { seeder: {}, calculator: {} };
             input.header = userHeader;
-            input.seeder.body = userFetchFn();
+            const fetch = userFetchFn();
+            input.seeder.body = async (input, renderer) => {
+                let feed;
+                while ((feed = await fetch())) {
+                    await renderer(feed);
+                }
+            };
             input.calculator.body = async (input) => {
                 if (!input.output.savings) input.output.savings = 0;
                 input.output.savings += input.feed.savings;
@@ -292,8 +298,9 @@ describe('Domain > DocGenDomain', () => {
             const stream = new TextStreamUtil();
             await expect(templateDomain.generateAll(templates, input, stream)).resolves.toBeUndefined();
             console.log('csv', stream.getContent());
+            const lines = stream.getContent().split(/\r?\n/);
 
-            expect(stream.getContent().length).toBeGreaterThan(0);
+            expect(lines.length).toBeGreaterThan(3);
             // expect(stream.getContent().indexOf('<body>')).toBeGreaterThan(0);
         });
     });
