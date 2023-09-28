@@ -49,14 +49,12 @@ export class PdfGenerator extends OutputGenerator {
         const page = await browser.newPage();
 
         //Get HTML content from HTML file
-        console.log('content written into pdf', params.content);
         await page.setContent(params.content, { waitUntil: 'domcontentloaded' });
 
         // To reflect CSS used for screens instead of print
         await page.emulateMediaType('screen');
 
         const path = params.path;
-        console.log('pdf path', path);
 
         // Download the PDF
         await page.pdf({
@@ -72,9 +70,11 @@ export class PdfGenerator extends OutputGenerator {
 
     splitHeaderAndFooterFromHTML(html) {
         const headerRegex = /<header>((.|\n|\t|\r)+)<\/header>/g;
-        const header = (html.match(headerRegex)[0] || '').replace(/<\/?header>/g, '').trim();
+        const headerMatch = html.match(headerRegex) || [];
+        const header = (headerMatch[0] || '').replace(/<\/?header>/g, '').trim();
         const footerRegex = /<footer>((.|\n|\t|\r)+)<\/footer>/g;
-        const footer = (html.match(footerRegex)[0] || '').replace(/<\/?footer>/g, '').trim();
+        const footerMatch = html.match(footerRegex) || [];
+        const footer = (footerMatch[0] || '').replace(/<\/?footer>/g, '').trim();
         const body = html.replace(headerRegex, '').replace(footerRegex, '');
 
         return { body, header, footer };
