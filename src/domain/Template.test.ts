@@ -3,21 +3,22 @@ import { defaultsDeep } from 'lodash';
 export const findCook = (templateConfigService, defaultTemplateWhere, uid = '') => {
     const where: any = defaultsDeep({}, defaultTemplateWhere);
     if (uid) where.templateUid = uid;
-    return () =>
-        templateConfigService.find({
-            where,
-            relations: {
-                template: true,
-                templateContents: true,
-            },
-            take: 1,
-        });
+    return async () =>
+        (
+            (await templateConfigService.find({
+                where,
+                relations: {
+                    template: true,
+                    templateContents: true,
+                },
+                take: 1,
+            })) || []
+        ).shift() || {};
 };
 
 export const getNormalizedContents = async function ({ templateDomain, templateConfigService, defaultTemplateWhere, templateUid }) {
-    templateDomain.setOptions({ database: { find: findCook(templateConfigService, defaultTemplateWhere, templateUid) } });
-
-    const templateConfig = await templateDomain.findTemplateConfig();
+    const templateConfig = await findCook(templateConfigService, defaultTemplateWhere, templateUid)();
+    templateDomain.setOptions({ templateConfig });
     return templateDomain.normalizeTemplateContents(templateConfig.templateContents);
 };
 

@@ -2,7 +2,7 @@ import { chain, each, keyBy, map, size, sortBy } from 'lodash';
 import { ObjectLiteral } from 'typeorm';
 import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
 
-import { DomainOptions, TemplateObjectListInterface } from '../interfaces/domain';
+import { TemplateObjectListInterface } from '../interfaces/domain';
 import { TemplateConfigInterface, TemplateContentInterface, TemplateContentObjectListInterface, TemplateInterface } from '../interfaces/entities';
 import { TemplateGenerator } from '../templates/template.abstract';
 import { DocGeneratorErrorType } from '../types/error';
@@ -14,11 +14,8 @@ import { CsvGenerator } from '../templates/csv';
 import { DomainOptionsUtil } from '../utils/DomainOptions';
 
 export class TemplateDomain extends DomainOptionsUtil {
-    async findTemplateConfig(): Promise<TemplateConfigInterface> {
-        const templateConfig = (await this.options.database.find()).shift();
-
-        if (!size(templateConfig)) error(DocGeneratorErrorType.NO_CONFIG);
-        return templateConfig as TemplateConfigInterface;
+    checkTemplateConfig() {
+        if (!size(this.options.templateConfig)) error(DocGeneratorErrorType.NO_CONFIG);
     }
 
     normalizeTemplateContents(contents: TemplateContentInterface[]): TemplateContentInterface[] {
@@ -114,16 +111,16 @@ export class TemplateDomain extends DomainOptionsUtil {
 
     buildTemplateConfigRelations() {
         const relations: any = {};
-        each(this.options.database.configRelations, (name) => (relations[name] = true));
+        each(this.options.database.relationsKeys, (name) => (relations[name] = true));
         return relations;
     }
 
     getContentsKey() {
-        return this.options.database.configRelations.contents;
+        return this.options.database.relationsKeys.contents;
     }
 
     getTemplateRootKey() {
-        return this.options.database.configRelations.template;
+        return this.options.database.relationsKeys.template;
     }
 
     getContentIdKey() {
@@ -138,7 +135,7 @@ export class TemplateDomain extends DomainOptionsUtil {
         return this.options.database.contentParentId;
     }
 
-    getContents(templateConfig): TemplateContentInterface[] {
+    getContents(templateConfig: TemplateConfigInterface): TemplateContentInterface[] {
         const contentsKey = this.getContentsKey();
         return templateConfig[contentsKey];
     }

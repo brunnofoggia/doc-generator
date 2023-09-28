@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { DataSource, DeepPartial } from 'typeorm';
 import { each, size, isArray, defaultsDeep } from 'lodash';
 import { TextStreamUtil } from 'cloud-solutions/dist/local/storage/textStreamUtil';
 
@@ -16,19 +16,22 @@ import { TemplateDomain } from './Template';
 import { TemplateGenerator } from 'templates/template.abstract';
 import { findCook, getNormalizedContents, getTemplateGenerators, getTemplateGeneratorsFromContents } from './Template.test';
 import { userFetchFn, userHeader } from '@test/mock/data/user';
+import { DatabaseOptions } from 'interfaces/domain';
+import { TemplateConfigInterface } from 'interfaces/entities';
 
 describe('Domain > DocGenDomain', () => {
     let conn: DataSource;
     let templateService: TemplateService;
     let templateConfigService: TemplateConfigService;
     let templateContentService: TemplateContentService;
+    let templateConfig: TemplateConfigInterface;
 
     const configRelations = {
         template: 'template',
         contents: 'templateContents',
     };
-    const databaseConfig: any = {
-        configRelations,
+    const databaseConfig: DeepPartial<DatabaseOptions> = {
+        relationsKeys: configRelations,
         contentId: 'id',
         contentParentId: 'templateContentId',
         contentName: 'name',
@@ -45,18 +48,17 @@ describe('Domain > DocGenDomain', () => {
         templateService = services.templateService;
         templateConfigService = services.templateConfigService;
         templateContentService = services.templateContentService;
-        const templateWhere = { ...defaultTemplateWhere };
 
-        databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere);
+        const templateWhere = { ...defaultTemplateWhere };
+        templateConfig = await findCook(templateConfigService, defaultTemplateWhere, templateSingleHtml.uid)();
+    });
+
+    beforeEach(() => {
         templateDomain = new TemplateDomain({
+            templateConfig,
             database: databaseConfig,
         });
     });
-
-    // beforeEach(() => {
-    //     const templateWhere = { ...defaultTemplateWhere };
-    //     templateDomain.setOptions({ templateWhere });
-    // });
 
     describe('variables and data ready', () => {
         it('database connected', () => {
@@ -93,24 +95,11 @@ describe('Domain > DocGenDomain', () => {
         it('template config not found', async () => {
             expect.assertions(1);
 
-            databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere, 'xxx');
-            templateDomain.setOptions({ database: databaseConfig });
-            // const templateWhere = { ...defaultTemplateWhere, templateUid: 'xxx' };
-            // templateDomain.setOptions({ templateWhere });
+            templateDomain = new TemplateDomain({
+                database: databaseConfig,
+            });
 
-            await expect(templateDomain.findTemplateConfig()).rejects.toThrowError(getError(DocGeneratorErrorType.NO_CONFIG));
-        });
-
-        it('find one template config', async () => {
-            expect.assertions(1);
-
-            databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere, templateSingleHtml.uid);
-            templateDomain.setOptions({ database: databaseConfig });
-            // const templateWhere = { ...defaultTemplateWhere, templateUid: templateSingleHtml.uid };
-            // templateDomain.setOptions({ templateWhere });
-            const result = await templateDomain.findTemplateConfig();
-
-            expect(size(result)).toBeGreaterThanOrEqual(1);
+            await expect(async () => templateDomain.checkTemplateConfig()).rejects.toThrowError(getError(DocGeneratorErrorType.NO_CONFIG));
         });
     });
 
@@ -135,13 +124,12 @@ describe('Domain > DocGenDomain', () => {
         it('key contents by id', async () => {
             expect.assertions(1);
 
-            databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere, templateRecursiveHtml.uid);
-            templateDomain.setOptions({ database: databaseConfig });
+            const _templateConfig = await findCook(templateConfigService, defaultTemplateWhere, templateRecursiveHtml.uid)();
+            templateDomain.setOptions({ templateConfig: _templateConfig });
             // const templateWhere = { ...defaultTemplateWhere, templateUid: templateRecursiveHtml.uid };
             // templateDomain.setOptions({ templateWhere });
 
-            const templateConfig = await templateDomain.findTemplateConfig();
-            const contents = templateDomain.keyByIdTemplateContents(templateConfig.templateContents);
+            const contents = templateDomain.keyByIdTemplateContents(_templateConfig.templateContents);
 
             let test = true;
             each(contents, (content, index) => {

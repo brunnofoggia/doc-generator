@@ -1,4 +1,4 @@
-import { defaultsDeep, size } from 'lodash';
+import { defaultsDeep, size, cloneDeep } from 'lodash';
 import { DeepPartial, ObjectLiteral } from 'typeorm';
 
 import { DomainOptions } from '../interfaces/domain';
@@ -13,7 +13,7 @@ import { OutputType } from '../types/output';
 
 const getDefaultOptions = (): DeepPartial<DomainOptions> => ({
     database: {
-        configRelations: {
+        relationsKeys: {
             template: 'template',
             contents: 'templateContents',
         },
@@ -41,6 +41,7 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
 
     constructor(options: DeepPartial<DomainOptions>) {
         super(options, getDefaultOptions());
+        this.setTemplateConfig();
     }
 
     setChild() {
@@ -56,7 +57,7 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
 
     async buildTemplatesList() {
         if (!this.templates) {
-            await this.setTemplateConfig();
+            this.buildGlobalConfig();
 
             this.templates = this.domain.template.buildTemplatesTree(
                 this.domain.template.templatesFactory(
@@ -68,20 +69,20 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
         return this;
     }
 
-    async setTemplateConfig() {
-        await this.findTemplateConfig();
-        this.buildGlobalConfig();
-    }
-
-    async findTemplateConfig() {
-        if (!this.templateConfig) {
-            this.templateConfig = await this.domain.template.findTemplateConfig();
+    setTemplateConfig(templateConfig: any = null) {
+        !size(templateConfig) && (templateConfig = this.options.templateConfig);
+        if (size(templateConfig)) {
+            this.templateConfig = cloneDeep(templateConfig as TemplateConfigInterface);
+            this.domain.template.setOptions({ templateConfig });
         }
         return this.templateConfig;
     }
 
     buildGlobalConfig(customOptions: any = {}, replace = false) {
-        if (!this.globalConfig || replace) {
+        this.setTemplateConfig();
+        this.domain.template.checkTemplateConfig();
+
+        if (!size(this.globalConfig) || replace) {
             const template = this.domain.template.getTemplateRoot(this.templateConfig);
             this.globalConfig = defaultsDeep(customOptions, this.templateConfig.config, template.defaultConfig);
 
@@ -98,9 +99,6 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
     async generate(data) {
         await this.buildTemplatesList();
         await this.validateTemplates();
-        // if (stream) this.options.stream = stream;
-        // if (!this.options.stream) error(DocGeneratorErrorType.NO_STREAM);
-        // if (!(this.options.stream instanceof WriteStream)) error(DocGeneratorErrorType.INCOMPATIBLE_STREAM);
 
         const generateStream = await this.getGenerateStream();
         await this.domain.template.generateAll(this.templates, data, generateStream);

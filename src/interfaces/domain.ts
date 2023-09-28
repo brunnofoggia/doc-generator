@@ -1,7 +1,8 @@
-import { FindOptionsWhere, ObjectLiteral } from 'typeorm';
+import { ObjectLiteral } from 'typeorm';
 import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
 
 import { TemplateGenerator } from '../templates/template.abstract';
+import { TemplateConfigInterface } from './entities';
 
 export interface FileOptions {
     fileSystem?: FileSystem;
@@ -18,19 +19,14 @@ export interface Files extends FileOptions {
 }
 
 export interface DatabaseOptions {
-    find: any;
-    configRelations: TemplateConfigRelations;
+    relationsKeys: TemplateConfigRelations;
     contentId: string;
     contentParentId: string;
     contentName: string;
 }
 
 export interface DomainOptions {
-    // templateService: Service;
-    // templateConfigService: Service;
-    // templateContentService: Service;
-    // templateWhere: FindOptionsWhere<ObjectLiteral>;
-
+    templateConfig: TemplateConfigInterface;
     database: DatabaseOptions;
     file: Files;
 }

@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { DataSource, DeepPartial } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import { sleep } from 'node-common/dist/utils';
 
@@ -17,6 +17,7 @@ import { TemplateConfigInterface, TemplateContentInterface } from 'interfaces/en
 import { HtmlGenerator } from './html';
 import { userFetchFn } from '@test/mock/data/user';
 import { findCook } from 'domain/Template.test';
+import { DatabaseOptions } from 'interfaces/domain';
 
 describe('Domain > DocGenDomain', () => {
     let conn: DataSource;
@@ -30,8 +31,8 @@ describe('Domain > DocGenDomain', () => {
         template: 'template',
         contents: 'templateContents',
     };
-    const databaseConfig: any = {
-        configRelations,
+    const databaseConfig: DeepPartial<DatabaseOptions> = {
+        relationsKeys: configRelations,
         contentId: 'id',
         contentParentId: 'templateContentId',
         contentName: 'name',
@@ -51,14 +52,14 @@ describe('Domain > DocGenDomain', () => {
         templateContentService = services.templateContentService;
 
         const templateWhere = { ...defaultTemplateWhere };
-        databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere);
-        domain = new TemplateDomain({
-            database: databaseConfig,
-        });
+        templateConfig = await findCook(templateConfigService, defaultTemplateWhere)();
     });
 
     beforeEach(async () => {
-        templateConfig = await domain.findTemplateConfig();
+        domain = new TemplateDomain({
+            templateConfig,
+            database: databaseConfig,
+        });
         contents = domain.normalizeTemplateContents([templateConfig.templateContents[0]]);
         template = domain.templateFactory(contents[0], {}) as HtmlGenerator;
     });

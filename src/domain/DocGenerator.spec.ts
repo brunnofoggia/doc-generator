@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { DataSource, DeepPartial } from 'typeorm';
 import { DatabaseConnect } from '@test/utils/connect';
 import { configSingleHtml, projectUid, templateConfigList } from '@test/mock/entities/templateConfig';
 import { TemplateService } from '@test/services/template.service';
@@ -14,6 +14,8 @@ import { TemplateGenerator } from 'templates/template.abstract';
 import { DocGeneratorDomain } from './DocGenerator';
 import { OutputType } from 'types/output';
 import { findCook } from './Template.test';
+import { DatabaseOptions, DomainOptions } from 'interfaces/domain';
+import { TemplateConfigInterface } from 'interfaces/entities';
 
 describe('Domain > DocGenerator', () => {
     const uniqueName = 'DocGenerator';
@@ -21,12 +23,13 @@ describe('Domain > DocGenerator', () => {
     let templateService: TemplateService;
     let templateConfigService: TemplateConfigService;
     let templateContentService: TemplateContentService;
+    let templateConfig: TemplateConfigInterface;
     const configRelations = {
         template: 'template',
         contents: 'templateContents',
     };
-    const databaseConfig: any = {
-        configRelations,
+    const databaseConfig: DeepPartial<DatabaseOptions> = {
+        relationsKeys: configRelations,
         contentId: 'id',
         contentParentId: 'templateContentId',
         contentName: 'name',
@@ -43,12 +46,12 @@ describe('Domain > DocGenerator', () => {
         templateService = services.templateService;
         templateConfigService = services.templateConfigService;
         templateContentService = services.templateContentService;
+        templateConfig = await findCook(templateConfigService, defaultTemplateWhere, templateSingleHtml.uid)();
     });
 
-    beforeEach(() => {
-        databaseConfig.find = findCook(templateConfigService, defaultTemplateWhere, templateSingleHtml.uid);
+    beforeEach(async () => {
         domain = new DocGeneratorDomain({
-            database: databaseConfig,
+            templateConfig,
         });
     });
 
@@ -66,7 +69,6 @@ describe('Domain > DocGenerator', () => {
         it('merging config from template and templateConfig', async () => {
             expect.assertions(1);
 
-            await domain.findTemplateConfig();
             const globalConfig1 = domain.buildGlobalConfig();
             const globalConfig2 = defaultsDeep(configSingleHtml.config, templateSingleHtml.defaultConfig);
 
@@ -85,7 +87,7 @@ describe('Domain > DocGenerator', () => {
             expect(content.indexOf(title)).toBeGreaterThan(0);
         });
 
-        it('generate plain html and converto to pdf', async () => {
+        it('generate plain html and convert to pdf', async () => {
             expect.assertions(1);
 
             const title = [uniqueId(uniqueName), new Date().toISOString()].join('-');
