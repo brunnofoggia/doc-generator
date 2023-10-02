@@ -61,9 +61,7 @@ export class FileDomain extends DomainOptionsUtil {
     }
 
     setFilepath(streamType: StreamType) {
-        const uid = this.getUid();
-        const path = [uid, uniqueId(`${streamType}`)].join('/');
-        return path;
+        return streamType as string;
     }
 
     getFullFilepath(streamType: StreamType) {
