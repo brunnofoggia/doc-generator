@@ -10,7 +10,7 @@ export class DocGeneratorBuilder {
         await this.domain.buildTemplatesList();
         await this.domain.validateTemplates();
 
-        await this.domain.generate(data);
+        return await this.domain.generate(data);
     }
 
     async generateAndOutput(options: DeepPartial<DomainOptions>, data = null) {

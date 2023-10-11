@@ -34,7 +34,9 @@ export abstract class ContentGenerator extends TemplateGenerator {
 
     async loopSeederFn(input, stream: WriteStreamInterface, seeder, calculator) {
         const renderer = async (feed = null) => {
+            input.options = this.data.options;
             input.feed = feed;
+
             const rendered = await this.render(input);
             await stream.writeLine(rendered);
             await calculator(input);

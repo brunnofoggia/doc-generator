@@ -1,6 +1,5 @@
-import { each, uniqueId } from 'lodash';
+import { template } from 'lodash';
 import { Adapters } from 'cloud-solutions';
-import { v4 as uuidv4 } from 'uuid';
 
 import { DocGeneratorErrorType } from '../types/error';
 import { StreamType } from '../types/stream';
@@ -26,31 +25,39 @@ export class FileDomain extends DomainOptionsUtil {
     }
 
     async createStream(streamType: StreamType) {
-        let fs = this.getProperty(streamType, 'fileSystem');
-        if (!fs) fs = this.setProperty(streamType, 'fileSystem', await this.createFileSystem(streamType));
+        const fs = await this.setFileSystem(streamType);
 
         if (!fs) error(DocGeneratorErrorType.NO_FILESYSTEM);
 
-        const filePath = this.setProperty(streamType, 'filePath', this.setFilepath(streamType));
+        const filePath = this.setFilepath(streamType);
         const stream = await fs.sendStream(filePath);
         return stream;
     }
 
-    async createFileSystem(streamType: StreamType) {
-        const dirPath = this.getProperty(streamType, 'dirPath');
-        if (!dirPath) error(DocGeneratorErrorType.NO_FILE_DIRPATH);
+    async setFileSystem(streamType: StreamType) {
+        if (!this.getProperty(streamType, 'fileSystem')) {
+            const fs = new Adapters.Local.StorageAdapter();
+            await fs.initialize({});
 
-        const fs = new Adapters.Local.StorageAdapter();
-        await fs.initialize({
-            Bucket: dirPath,
-        });
-        this.setProperty(streamType, 'baseDir', fs.getOptions().baseDir);
+            this.setProperty(streamType, 'fileSystem', fs);
+            this.setBaseDir(streamType);
+        }
 
-        return fs;
+        return this.getProperty(streamType, 'fileSystem');
+    }
+
+    setBaseDir(streamType: StreamType) {
+        if (!this.getProperty(streamType, 'baseDir')) {
+            const fs = this.getProperty(streamType, 'fileSystem');
+            if (!fs) error(DocGeneratorErrorType.NO_FILE_BASEDIR);
+
+            this.setProperty(streamType, 'baseDir', fs.getOptions().baseDir);
+        }
+        return this.getProperty(streamType, 'baseDir');
     }
 
     async getContent(streamType: StreamType) {
-        const fs = await this.createFileSystem(streamType);
+        const fs = this.getProperty(streamType, 'fileSystem');
         const filePath = this.getProperty(streamType, 'filePath');
 
         return await fs.readContent(filePath);
@@ -61,12 +68,21 @@ export class FileDomain extends DomainOptionsUtil {
     }
 
     setFilepath(streamType: StreamType) {
-        return streamType as string;
+        if (!this.getProperty(streamType, 'filePath')) {
+            const dirPath = this.getProperty(streamType, 'dirPath');
+            if (!dirPath) error(DocGeneratorErrorType.NO_FILE_DIRPATH);
+            const fileName = template(this.getProperty(streamType, 'name'))({ streamType });
+
+            const filePath = [dirPath, fileName].join('/');
+            this.setProperty(streamType, 'filePath', filePath);
+        }
+
+        return this.getProperty(streamType, 'filePath');
     }
 
     getFullFilepath(streamType: StreamType) {
-        const baseDir = this.getProperty(streamType, 'baseDir');
-        const filePath = this.getProperty(streamType, 'filePath');
+        const baseDir = this.setBaseDir(streamType);
+        const filePath = this.setFilepath(streamType);
         const path = [];
 
         if (baseDir) path.push(baseDir);
@@ -78,20 +94,6 @@ export class FileDomain extends DomainOptionsUtil {
     readPathFromFullfilePath(streamType: StreamType, path) {
         const baseDir = this.getProperty(streamType, 'baseDir') || '';
         return path.substr(baseDir.length ? baseDir.length + 1 : 0);
-    }
-
-    getUid() {
-        let uid = this.getGlobalProperty('uid');
-        if (!uid) uid = this.setUid();
-
-        return uid;
-    }
-
-    setUid() {
-        const uid = uuidv4();
-        this.setGlobalProperty('uid', uid);
-
-        return uid;
     }
 
     getProperty(streamType: StreamType, property) {

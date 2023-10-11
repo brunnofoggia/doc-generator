@@ -23,6 +23,8 @@ const getDefaultOptions = (): DeepPartial<DomainOptions> => ({
     },
     file: {
         dirPath: 'doc-generator',
+        name: '<%=streamType%>',
+        baseDir: 'tmp',
     },
 });
 
@@ -103,7 +105,7 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
         const generateStream = await this.getGenerateStream();
         await this.domain.template.generateAll(this.templates, data, generateStream);
 
-        return this;
+        return { path: this.getPath(StreamType.GENERATE) };
     }
 
     async getGenerateContent() {
@@ -115,17 +117,19 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
         if (this.isOutputDiffFromGenerate()) {
             const content = await this.domain.file.getGenerateContent();
 
-            const stream = await this.domain.file.getStream(streamType);
+            const fs = await this.domain.file.setFileSystem(streamType);
+            const stream = this.domain.output.isStreamNeed() ? await this.domain.file.getStream(streamType) : null;
             const path = this.domain.file.getFullFilepath(streamType);
 
-            const result = await this.domain.output.generate({ stream, content, path });
+            const result = await this.domain.output.generate({ fileSystem: fs, stream, content, path });
+
             if (result.path) {
                 const _path = this.domain.file.readPathFromFullfilePath(streamType, result.path);
                 this.domain.file.setProperty(streamType, 'filePath', _path);
             }
         }
 
-        return this.getPath(streamType);
+        return { path: this.getPath(streamType) };
     }
 
     getGenerateStream() {

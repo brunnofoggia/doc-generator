@@ -3,6 +3,7 @@ import { PDFOptions } from 'puppeteer';
 
 import { OutputGenerator } from './output.abstract';
 import { OutputType } from '../types/output';
+import { OutputGenerateParams } from '../interfaces/domain';
 
 // https://pptr.dev/api/puppeteer.pdfoptions
 const defaultConfig: Partial<PDFOptions> = {
@@ -21,7 +22,7 @@ export class PdfGenerator extends OutputGenerator {
     protected readonly baseType = OutputType.PDF;
     protected readonly needStream = false;
 
-    public async generate(_params: { stream; path; content; config: PDFOptions }) {
+    public async generate(_params: OutputGenerateParams) {
         await super.generate({ stream: _params.stream });
 
         const params = cloneDeep(_params);
@@ -31,12 +32,23 @@ export class PdfGenerator extends OutputGenerator {
         this.setHeaderAndFooter(params, header, footer);
         params.content = body;
 
-        params.path = this.buildPath(params.path);
+        await this.createDirTree(params.path, _params.fileSystem);
+        params.path = this.preparePath(params.path, _params.fileSystem);
         return this.conversion(params);
     }
 
-    buildPath(_path) {
-        return _path + '.pdf';
+    preparePath(path, fs) {
+        if (!path.startsWith(fs.getOptions().baseDir)) {
+            path = [fs.getOptions().baseDir, path.replace(/^\//, '')].join('/');
+        }
+
+        return path;
+    }
+
+    async createDirTree(_path, fs) {
+        const path = _path.replace(fs.getOptions().baseDir + '/', '');
+        await fs.sendContent(path, '');
+        await fs.deleteFile(path);
     }
 
     protected async conversion(params) {

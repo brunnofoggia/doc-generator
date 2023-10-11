@@ -1,4 +1,5 @@
-import { ObjectLiteral } from 'typeorm';
+import { PDFOptions } from 'puppeteer';
+import { ObjectLiteral, DeepPartial } from 'typeorm';
 import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
 
 import { TemplateGenerator } from '../templates/template.abstract';
@@ -10,6 +11,7 @@ export interface FileOptions {
 
     baseDir?: string;
     dirPath?: string;
+    name?: string;
     filePath?: string;
 }
 
@@ -50,4 +52,13 @@ export interface FileSystem {
     sendContent(path, content, options?);
     readStream(path, options?);
     sendStream?(path, options?);
+    getOptions();
+}
+
+export interface OutputGenerateParams {
+    fileSystem: FileSystem;
+    stream?;
+    path: string;
+    content: string;
+    config?: DeepPartial<PDFOptions>;
 }

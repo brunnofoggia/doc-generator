@@ -1,3 +1,4 @@
+import { OutputGenerateParams } from '../interfaces/domain';
 import { OutputType } from '../types/output';
 
 export abstract class OutputGenerator {
@@ -14,9 +15,9 @@ export abstract class OutputGenerator {
 
     // should be able to write all content to a pdf
     // or return file generated without modifications
-    public async generate(params: any): Promise<any> {
+    public async generate(_params: Partial<OutputGenerateParams>): Promise<any> {
         if (!this.isStreamNeed()) {
-            await params?.stream?.end();
+            await _params?.stream?.end();
         }
         return {};
     }

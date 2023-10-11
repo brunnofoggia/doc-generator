@@ -10,7 +10,6 @@ export interface TemplateInterface {
 export interface TemplateContentConfigInterface {
     type: TemplateType;
     order: number;
-    multiple?: boolean;
     ejsConfig?: any;
 }
 

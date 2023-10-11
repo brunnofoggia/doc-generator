@@ -1,6 +1,6 @@
 {
     "name": "doc-generator",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "description": "",
     "license": "ISC",
     "author": "Bruno Foggia",
@@ -23,6 +23,7 @@
         "@commitlint/config-conventional": "^17.4.4",
         "@faker-js/faker": "^8.0.2",
         "@types/jest": "^29.4.0",
+        "@types/lodash": "^4.14.191",
         "@types/node": "^18.14.5",
         "@typescript-eslint/eslint-plugin": "^5.54.0",
         "@typescript-eslint/parser": "^5.54.0",
@@ -45,14 +46,12 @@
         "typescript": "^4.9.5"
     },
     "dependencies": {
-        "@types/lodash": "^4.14.191",
         "cloud-solutions": "github:brunnofoggia/cloud-solutions",
         "ejs": "^3.1.9",
         "lodash": "^4.17.21",
         "node-common": "github:brunnofoggia/node-common",
         "puppeteer": "^21.1.1",
-        "typeorm": "^0.3.17",
-        "uuid": "^9.0.0"
+        "typeorm": "^0.3.17"
     },
     "files": [
         "/lib"
