@@ -1,4 +1,4 @@
-import { each, sortBy } from 'lodash';
+import { each, omit, sortBy } from 'lodash';
 import { ObjectLiteral } from 'typeorm';
 
 import { TemplateContentInterface } from '../interfaces/entities';
@@ -98,7 +98,8 @@ export abstract class TemplateGenerator {
 
     async generateWithOutput(template, data, stream, outputs) {
         const output = {};
-        await template.generate({ data, output, outputs }, stream);
+        const input = { data: omit(data, 'root'), ...(data.root || {}), output, outputs };
+        await template.generate(input, stream);
         outputs[template.getName()] = output;
         return output;
     }
