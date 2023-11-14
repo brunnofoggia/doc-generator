@@ -1,43 +1,38 @@
-import { PDFOptions } from 'puppeteer';
-import { DeepPartial } from 'typeorm';
-
 import { DomainOptionsUtil } from '../utils/DomainOptions';
 import { OutputType } from '../types/output';
-import { PdfGenerator } from '../outputs/pdf';
-import { PlainGenerator } from '../outputs/plain';
 import { OutputGenerator } from '../outputs/output.abstract';
 import { OutputGenerateParams } from '../interfaces/domain';
 
 interface OutputConfig {
     outputType: OutputType;
     outputConfig: any;
-    pdfConfig?: DeepPartial<PDFOptions>;
 }
 
 export class OutputDomain extends DomainOptionsUtil {
     protected config: Partial<OutputConfig> = {};
     protected instance: OutputGenerator;
 
-    setConfig(config: Partial<OutputConfig>) {
+    async setConfig(config: Partial<OutputConfig>) {
         this.config = config;
-        this.outputFactory();
+        await this.outputFactory();
     }
 
-    outputFactory(): OutputGenerator {
-        const _class = this.defineTemplateClass();
+    async outputFactory(): Promise<OutputGenerator> {
+        const _class = await this.defineTemplateClass();
         return (this.instance = new _class());
     }
 
-    defineTemplateClass() {
+    async defineTemplateClass() {
         const type = this.readType();
+        const ext = /\.js$/.test(__filename) ? 'js' : 'ts';
 
         let _class;
         switch (type) {
             case OutputType.PDF:
-                _class = PdfGenerator;
+                _class = (await import(`../outputs/pdf.${ext}`)).default;
                 break;
             default:
-                _class = PlainGenerator;
+                _class = (await import(`../outputs/plain.${ext}`)).default;
         }
 
         return _class;
@@ -48,7 +43,7 @@ export class OutputDomain extends DomainOptionsUtil {
     }
 
     async generate({ fileSystem: fs, stream, content, path, config }: OutputGenerateParams) {
-        return await this.instance.generate({ fileSystem: fs, stream, content, config: config || this.config.pdfConfig || {}, path });
+        return await this.instance.generate({ fileSystem: fs, stream, content, config: config || this.config.outputConfig || {}, path });
     }
 
     isStreamNeed() {

@@ -9,3 +9,5 @@ export class PlainGenerator extends OutputGenerator {
         null;
     }
 }
+
+export default PlainGenerator;

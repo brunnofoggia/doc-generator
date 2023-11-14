@@ -69,7 +69,7 @@ describe('Domain > DocGenerator', () => {
         it('merging config from template and templateConfig', async () => {
             expect.assertions(1);
 
-            const globalConfig1 = domain.buildGlobalConfig();
+            const globalConfig1 = await domain.buildGlobalConfig();
             const globalConfig2 = defaultsDeep(configSingleHtml.config, templateSingleHtml.defaultConfig);
 
             expect(globalConfig1).toEqual(globalConfig2);

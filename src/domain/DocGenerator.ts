@@ -59,7 +59,7 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
 
     async buildTemplatesList() {
         if (!this.templates) {
-            this.buildGlobalConfig();
+            await this.buildGlobalConfig();
 
             this.templates = this.domain.template.buildTemplatesTree(
                 this.domain.template.templatesFactory(
@@ -80,7 +80,7 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
         return this.templateConfig;
     }
 
-    buildGlobalConfig(customOptions: any = {}, replace = false) {
+    async buildGlobalConfig(customOptions: any = {}, replace = false) {
         this.setTemplateConfig();
         this.domain.template.checkTemplateConfig();
 
@@ -88,7 +88,7 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
             const template = this.domain.template.getTemplateRoot(this.templateConfig);
             this.globalConfig = defaultsDeep(customOptions, this.templateConfig.config, template.defaultConfig);
 
-            this.domain.output.setConfig(this.globalConfig);
+            await this.domain.output.setConfig(this.globalConfig);
         }
         return this.globalConfig;
     }

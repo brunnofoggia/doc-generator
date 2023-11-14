@@ -111,3 +111,5 @@ export class PdfGenerator extends OutputGenerator {
         }
     }
 }
+
+export default PdfGenerator;
