@@ -2,6 +2,8 @@ import { DomainOptionsUtil } from '../utils/DomainOptions';
 import { OutputType } from '../types/output';
 import { OutputGenerator } from '../outputs/output.abstract';
 import { OutputGenerateParams } from '../interfaces/domain';
+import { isPlainObject } from 'lodash';
+import { getClassFromImport } from 'node-common/dist/utils';
 
 interface OutputConfig {
     outputType: OutputType;
@@ -24,17 +26,20 @@ export class OutputDomain extends DomainOptionsUtil {
 
     async defineTemplateClass() {
         const type = this.readType();
-        const ext = /\.js$/.test(__filename) ? 'js' : 'ts';
+        const ext = /\.js$/.test(__filename) ? '.js' : '.ts';
 
-        let _class;
+        let _import;
         switch (type) {
-            case OutputType.PDF:
-                _class = (await import(`../outputs/pdf.${ext}`)).default;
+            case OutputType.PPDF:
+                _import = await import(`../outputs/ppdf${ext}`);
+                break;
+            case OutputType.FPDF:
+                _import = await import(`../outputs/fpdf${ext}`);
                 break;
             default:
-                _class = (await import(`../outputs/plain.${ext}`)).default;
+                _import = await import(`../outputs/plain${ext}`);
         }
-
+        const _class = getClassFromImport(_import, 'default');
         return _class;
     }
 

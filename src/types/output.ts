@@ -1,4 +1,5 @@
 export enum OutputType {
     PLAIN = 'PLAIN',
-    PDF = 'PDF',
+    PPDF = 'PPDF',
+    FPDF = 'FPDF',
 }

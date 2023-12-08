@@ -18,8 +18,8 @@ const defaultConfig: Partial<PDFOptions> = {
     displayHeaderFooter: false,
 };
 
-export class PdfGenerator extends OutputGenerator {
-    protected readonly baseType = OutputType.PDF;
+export class PPdfGenerator extends OutputGenerator {
+    protected readonly baseType = OutputType.PPDF;
     protected readonly needStream = false;
 
     public async generate(_params: OutputGenerateParams) {
@@ -112,4 +112,4 @@ export class PdfGenerator extends OutputGenerator {
     }
 }
 
-export default PdfGenerator;
+export default PPdfGenerator;

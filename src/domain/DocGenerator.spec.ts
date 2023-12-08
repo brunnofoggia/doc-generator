@@ -1,20 +1,16 @@
 import { DataSource, DeepPartial } from 'typeorm';
 import { DatabaseConnect } from '@test/utils/connect';
-import { configSingleHtml, projectUid, templateConfigList } from '@test/mock/entities/templateConfig';
+import { configSingleHtml, projectUid } from '@test/mock/entities/templateConfig';
 import { TemplateService } from '@test/services/template.service';
 import { TemplateConfigService } from '@test/services/templateConfig.service';
 import { TemplateContentService } from '@test/services/templateContent.service';
-import { templateList, templateRecursiveHtml, templateSingleHtml } from '@test/mock/entities/template';
+import { templateSingleHtml } from '@test/mock/entities/template';
 import { getServices } from '@test/utils/prepareData';
-import { templateContentList } from '@test/mock/entities/templateContent';
-import { each, size, isArray, defaultsDeep, uniqueId } from 'lodash';
-import { getError } from 'utils';
-import { DocGeneratorErrorType } from '../types/error';
-import { TemplateGenerator } from 'templates/template.abstract';
+import { defaultsDeep, uniqueId } from 'lodash';
 import { DocGeneratorDomain } from './DocGenerator';
 import { OutputType } from 'types/output';
 import { findCook } from './Template.test';
-import { DatabaseOptions, DomainOptions } from 'interfaces/domain';
+import { DatabaseOptions } from 'interfaces/domain';
 import { TemplateConfigInterface } from 'interfaces/entities';
 
 describe('Domain > DocGenerator', () => {
@@ -101,9 +97,12 @@ describe('Domain > DocGenerator', () => {
             });
 
             // customize output
-            domain.buildGlobalConfig({
-                outputType: OutputType.PDF,
-            });
+            domain.buildGlobalConfig(
+                {
+                    outputType: OutputType.PPDF,
+                },
+                true,
+            );
 
             await domain.validateTemplates();
             const input = { title };

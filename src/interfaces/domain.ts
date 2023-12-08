@@ -1,5 +1,4 @@
-import { PDFOptions } from 'puppeteer';
-import { ObjectLiteral, DeepPartial } from 'typeorm';
+import { ObjectLiteral } from 'typeorm';
 import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
 
 import { TemplateGenerator } from '../templates/template.abstract';
@@ -60,5 +59,5 @@ export interface OutputGenerateParams {
     stream?;
     path: string;
     content: string;
-    config?: DeepPartial<PDFOptions>;
+    config?: any;
 }
