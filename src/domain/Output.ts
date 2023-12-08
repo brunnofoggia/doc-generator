@@ -11,6 +11,7 @@ interface OutputConfig {
 }
 
 export class OutputDomain extends DomainOptionsUtil {
+    protected domain: any = {};
     protected config: Partial<OutputConfig> = {};
     protected instance: OutputGenerator;
 

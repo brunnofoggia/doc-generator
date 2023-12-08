@@ -7,6 +7,8 @@ import { error } from '../utils';
 import { DomainOptionsUtil } from '../utils/DomainOptions';
 
 export class FileDomain extends DomainOptionsUtil {
+    protected domain: any = {};
+
     async getStream(streamType: StreamType) {
         let stream = this.getProperty(streamType, 'stream');
 

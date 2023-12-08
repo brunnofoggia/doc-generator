@@ -5,7 +5,7 @@ import { DomainOptions } from '../interfaces/domain';
 
 export abstract class DomainOptionsUtil {
     protected options: DeepPartial<DomainOptions> = {};
-    protected domain: any = {};
+    protected abstract domain: any;
 
     constructor(options: DeepPartial<DomainOptions> = {}, defaultOptions: DeepPartial<DomainOptions> = {}) {
         this.setChild();

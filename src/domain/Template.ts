@@ -14,6 +14,8 @@ import { CsvGenerator } from '../templates/csv';
 import { DomainOptionsUtil } from '../utils/DomainOptions';
 
 export class TemplateDomain extends DomainOptionsUtil {
+    protected domain: any = {};
+
     checkTemplateConfig() {
         if (!size(this.options.templateConfig)) error(DocGeneratorErrorType.NO_CONFIG);
     }

@@ -35,7 +35,7 @@ interface Domains {
 }
 
 export class DocGeneratorDomain extends DomainOptionsUtil {
-    protected domain: Partial<Domains>;
+    protected declare domain: Partial<Domains>;
     protected templateConfig: TemplateConfigInterface;
     protected templates: TemplateGenerator[];
 
