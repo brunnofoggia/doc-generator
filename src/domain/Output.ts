@@ -2,7 +2,6 @@ import { DomainOptionsUtil } from '../utils/DomainOptions';
 import { OutputType } from '../types/output';
 import { OutputGenerator } from '../outputs/output.abstract';
 import { OutputGenerateParams } from '../interfaces/domain';
-import { isPlainObject } from 'lodash';
 import { getClassFromImport } from 'node-common/dist/utils';
 
 interface OutputConfig {
@@ -37,10 +36,13 @@ export class OutputDomain extends DomainOptionsUtil {
             case OutputType.FPDF:
                 _import = await import(`../outputs/fpdf${ext}`);
                 break;
+            case OutputType.KPDF:
+                _import = await import(`../outputs/kpdf${ext}`);
+                break;
             default:
                 _import = await import(`../outputs/plain${ext}`);
         }
-        const _class = getClassFromImport(_import, 'default');
+        const _class = getClassFromImport(_import);
         return _class;
     }
 
@@ -54,5 +56,9 @@ export class OutputDomain extends DomainOptionsUtil {
 
     isStreamNeed() {
         return this.instance.isStreamNeed();
+    }
+
+    useContentAsStream() {
+        return this.instance.useContentAsStream();
     }
 }

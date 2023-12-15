@@ -1,4 +1,5 @@
-import { DataSource, DeepPartial } from 'typeorm';
+import { DataSource } from 'typeorm';
+import { DeepPartial } from 'node-common/dist/types/deepPartial';
 import { each, size, isArray, defaultsDeep } from 'lodash';
 import { TextStreamUtil } from 'cloud-solutions/dist/local/storage/textStreamUtil';
 
@@ -297,7 +298,6 @@ describe('Domain > DocGenDomain', () => {
 
             const stream = new TextStreamUtil();
             await expect(templateDomain.generateAll(templates, input, stream)).resolves.toBeUndefined();
-            console.log('csv', stream.getContent());
             const lines = stream.getContent().split(/\r?\n/);
 
             expect(lines.length).toBeGreaterThan(3);

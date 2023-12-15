@@ -1,5 +1,12 @@
 import { TemplateConfigEntity } from '../../entities/templateConfig.entity';
-import { templateMultipleCsv, templateMultipleHtml, templateRecursiveHtml, templateSingleHtml } from './template';
+import {
+    templateMultipleCsv,
+    templateMultipleFpdf,
+    templateMultipleHtml,
+    templateMultipleKpdf,
+    templateRecursiveHtml,
+    templateSingleHtml,
+} from './template';
 
 export const projectUid = 'test';
 
@@ -28,6 +35,28 @@ export const configMultipleHtml: TemplateConfigEntity = {
     config: {},
 };
 
+export const configMultipleKpdf: TemplateConfigEntity = {
+    id: id++,
+    projectUid,
+    templateUid: templateMultipleKpdf.uid,
+    config: {
+        outputConfig: {
+            libInstanceParams: { font: 'Times-Roman' },
+        },
+    },
+};
+
+export const configMultipleFpdf: TemplateConfigEntity = {
+    id: id++,
+    projectUid,
+    templateUid: templateMultipleFpdf.uid,
+    config: {
+        outputConfig: {
+            libInstanceParams: ['P', 'mm', 'A4'],
+        },
+    },
+};
+
 export const configMultipleCsv: TemplateConfigEntity = {
     id: id++,
     projectUid,
@@ -43,4 +72,11 @@ export const configRecursiveHtml: TemplateConfigEntity = {
 };
 
 // used to insert rows into db
-export const templateConfigList = [configSingleHtml, configMultipleHtml, configMultipleCsv, configRecursiveHtml];
+export const templateConfigList = [
+    configSingleHtml,
+    configMultipleHtml,
+    configMultipleKpdf,
+    configMultipleFpdf,
+    configMultipleCsv,
+    configRecursiveHtml,
+];

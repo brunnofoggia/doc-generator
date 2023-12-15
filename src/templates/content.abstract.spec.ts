@@ -1,4 +1,5 @@
-import { DataSource, DeepPartial } from 'typeorm';
+import { DataSource } from 'typeorm';
+import { DeepPartial } from 'node-common/dist/types/deepPartial';
 import { faker } from '@faker-js/faker';
 import { sleep } from 'node-common/dist/utils';
 

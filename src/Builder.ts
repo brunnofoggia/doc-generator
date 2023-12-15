@@ -1,6 +1,6 @@
 import { DomainOptions } from './interfaces/domain';
 import { DocGeneratorDomain } from './domain/DocGenerator';
-import { DeepPartial } from 'typeorm';
+import { DeepPartial } from 'node-common/dist/types/deepPartial';
 
 export class DocGeneratorBuilder {
     domain: DocGeneratorDomain;

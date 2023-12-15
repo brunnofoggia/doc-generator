@@ -1,21 +1,24 @@
 import { DataSource } from 'typeorm';
 import { DeepPartial } from 'node-common/dist/types/deepPartial';
 import { DatabaseConnect } from '@test/utils/connect';
-import { configSingleHtml, projectUid } from '@test/mock/entities/templateConfig';
+import { projectUid } from '@test/mock/entities/templateConfig';
 import { TemplateService } from '@test/services/template.service';
 import { TemplateConfigService } from '@test/services/templateConfig.service';
 import { TemplateContentService } from '@test/services/templateContent.service';
-import { templateSingleHtml } from '@test/mock/entities/template';
+import { templateMultipleKpdf } from '@test/mock/entities/template';
 import { getServices } from '@test/utils/prepareData';
-import { defaultsDeep, uniqueId } from 'lodash';
-import { DocGeneratorDomain, getDefaultOptions } from './DocGenerator';
+import { uniqueId } from 'lodash';
+import { DocGeneratorDomain, getDefaultOptions } from '../domain/DocGenerator';
 import { OutputType } from 'types/output';
-import { findCook } from './Template.test';
+import { findCook } from '../domain/Template.test';
 import { DatabaseOptions } from 'interfaces/domain';
 import { TemplateConfigInterface } from 'interfaces/entities';
+import { FileDomain } from 'domain/File';
+import { generate, output } from './kpdf.test';
 
 describe('Domain > DocGenerator', () => {
-    const uniqueName = 'DocGenerator';
+    const uniqueName = 'KPDF';
+    const dirPath = uniqueName;
     let conn: DataSource;
     let templateService: TemplateService;
     let templateConfigService: TemplateConfigService;
@@ -33,22 +36,35 @@ describe('Domain > DocGenerator', () => {
     };
 
     let domain: DocGeneratorDomain;
+    let sharedDomain: DocGeneratorDomain;
     const defaultTemplateWhere = {
         projectUid,
     };
 
     beforeAll(async () => {
+        const fs = await FileDomain.getLocalFileSystem();
+        await fs.deleteDirectory(dirPath);
+
         conn = await DatabaseConnect();
         const services = getServices(conn);
         templateService = services.templateService;
         templateConfigService = services.templateConfigService;
         templateContentService = services.templateContentService;
-        templateConfig = await findCook(templateConfigService, defaultTemplateWhere, templateSingleHtml.uid)();
+        templateConfig = await findCook(templateConfigService, defaultTemplateWhere, templateMultipleKpdf.uid)();
     });
 
     beforeEach(async () => {
         domain = new DocGeneratorDomain({
             templateConfig,
+            file: {
+                dirPath,
+                generate: {
+                    name: 'generate.tpl',
+                },
+                output: {
+                    name: 'output.pdf',
+                },
+            },
         });
     });
 
@@ -62,56 +78,22 @@ describe('Domain > DocGenerator', () => {
         });
     });
 
-    describe('global config', () => {
-        it('merging config from template and templateConfig', async () => {
-            expect.assertions(1);
-
-            const globalConfig1 = await domain.buildGlobalConfig();
-            const globalConfig2 = defaultsDeep(configSingleHtml.config, templateSingleHtml.defaultConfig);
-
-            expect(globalConfig1).toEqual(globalConfig2);
-        });
-    });
-
     describe('output', () => {
-        it('generate plain html and output', async () => {
+        it('generate fpdf template', async () => {
             expect.assertions(1);
 
-            const title = uniqueId(uniqueName);
-            await domain.generate({ title });
-            const content = await domain.getGenerateContent();
+            const { title, content } = await generate({ uniqueName, domain });
+            sharedDomain = domain;
 
             expect(content.indexOf(title)).toBeGreaterThan(0);
         });
 
-        it('generate plain html and convert to pdf', async () => {
+        it('convert fpdf template to pdf', async () => {
             expect.assertions(1);
 
-            const title = [uniqueId(uniqueName), new Date().toISOString()].join('-');
-            await domain.buildTemplatesList();
-
-            // customize options
-            domain.setOptions({
-                file: {
-                    dirPath: [getDefaultOptions().file.dirPath, title].join('/'),
-                },
-            });
-
-            // customize output
-            domain.buildGlobalConfig(
-                {
-                    outputType: OutputType.PPDF,
-                },
-                true,
-            );
-
-            await domain.validateTemplates();
-            const input = { title };
-            await domain.generate(input);
-            const content = await domain.getGenerateContent();
-            await domain.output();
-
-            expect(content.indexOf(title)).toBeGreaterThan(0);
+            const { line, stringExpected } = await output({ domain: sharedDomain });
+            sharedDomain = null;
+            expect(line).toContain(stringExpected);
         });
     });
 });

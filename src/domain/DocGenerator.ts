@@ -1,5 +1,6 @@
 import { defaultsDeep, size, cloneDeep } from 'lodash';
-import { DeepPartial, ObjectLiteral } from 'typeorm';
+import { DeepPartial } from 'node-common/dist/types/deepPartial';
+import { ObjectLiteral } from 'node-common/dist/types/objectLiteral';
 
 import { DomainOptions } from '../interfaces/domain';
 import { TemplateDomain } from './Template';
@@ -11,7 +12,7 @@ import { TemplateConfigInterface } from '../interfaces/entities';
 import { OutputDomain } from './Output';
 import { OutputType } from '../types/output';
 
-const getDefaultOptions = (): DeepPartial<DomainOptions> => ({
+export const getDefaultOptions = (): DeepPartial<DomainOptions> => ({
     database: {
         relationsKeys: {
             template: 'template',
@@ -102,20 +103,20 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
         await this.buildTemplatesList();
         await this.validateTemplates();
 
-        const generateStream = await this.getGenerateStream();
+        const generateStream = await this.getGenerateWriteStream();
         await this.domain.template.generateAll(this.templates, data, generateStream);
 
         return { path: this.getPath(StreamType.GENERATE) };
     }
 
     async getGenerateContent() {
-        return await this.domain.file.getContent(this.generateStreamType());
+        return this.domain.file.getContent(StreamType.GENERATE);
     }
 
     async output() {
         const streamType = StreamType.OUTPUT;
         if (this.isOutputDiffFromGenerate()) {
-            const content = await this.domain.file.getGenerateContent();
+            const content = await (!this.domain.output.useContentAsStream() ? this.getGenerateContent() : this.domain.file.getGenerateReadStream());
 
             const fs = await this.domain.file.setFileSystem(streamType);
             const stream = this.domain.output.isStreamNeed() ? await this.domain.file.getStream(streamType) : null;
@@ -132,8 +133,12 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
         return { path: this.getPath(streamType) };
     }
 
-    getGenerateStream() {
-        return this.domain.file.getStream(this.generateStreamType());
+    getGenerateWriteStream() {
+        return this.domain.file.getGenerateWriteStream();
+    }
+
+    getGenerateReadStream() {
+        return this.domain.file.getGenerateReadStream();
     }
 
     generateStreamType() {

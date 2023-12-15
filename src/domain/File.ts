@@ -22,7 +22,7 @@ export class FileDomain extends DomainOptionsUtil {
         return stream;
     }
 
-    async getGenerateStream() {
+    async getGenerateWriteStream() {
         return this.getStream(StreamType.GENERATE);
     }
 
@@ -36,10 +36,24 @@ export class FileDomain extends DomainOptionsUtil {
         return stream;
     }
 
+    async getGenerateReadStream() {
+        const streamType = StreamType.GENERATE;
+        const fs = this.getProperty(streamType, 'fileSystem');
+        const filePath = this.getProperty(streamType, 'filePath');
+        const stream = await fs.readStream(filePath);
+
+        return stream;
+    }
+
+    static async getLocalFileSystem() {
+        const fs = new Adapters.Local.StorageAdapter();
+        await fs.initialize({});
+        return fs;
+    }
+
     async setFileSystem(streamType: StreamType) {
         if (!this.getProperty(streamType, 'fileSystem')) {
-            const fs = new Adapters.Local.StorageAdapter();
-            await fs.initialize({});
+            const fs = await FileDomain.getLocalFileSystem();
 
             this.setProperty(streamType, 'fileSystem', fs);
             this.setBaseDir(streamType);

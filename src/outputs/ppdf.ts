@@ -21,9 +21,10 @@ const defaultConfig: Partial<PDFOptions> = {
 export class PPdfGenerator extends OutputGenerator {
     protected readonly baseType = OutputType.PPDF;
     protected readonly needStream = false;
+    protected readonly contentAsStream = false;
 
-    public async generate(_params: OutputGenerateParams) {
-        await super.generate({ stream: _params.stream });
+    async prepare(_params) {
+        await super.prepare(_params);
 
         const params = cloneDeep(_params);
         params.config = defaultsDeep({}, _params.config, defaultConfig);
@@ -34,6 +35,11 @@ export class PPdfGenerator extends OutputGenerator {
 
         await this.createDirTree(params.path, _params.fileSystem);
         params.path = this.preparePath(params.path, _params.fileSystem);
+        return params;
+    }
+
+    public async generate(_params: OutputGenerateParams) {
+        const params = await this.prepare(_params);
         return this.conversion(params);
     }
 
@@ -51,11 +57,18 @@ export class PPdfGenerator extends OutputGenerator {
         await fs.deleteFile(path);
     }
 
-    protected async conversion(params) {
+    async getBrowser(config) {
         const puppeteer = (await import('puppeteer')).default;
 
+        const options = { headless: 'new', ...(config.puppeteer || {}) };
+
         // Create a browser instance
-        const browser = await puppeteer.launch({ headless: 'new' });
+        const browser = await puppeteer.launch(options as any);
+        return browser;
+    }
+
+    async conversion(params) {
+        const browser = await this.getBrowser(params.config);
 
         // Create a new page
         const page = await browser.newPage();
