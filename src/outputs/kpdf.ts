@@ -19,6 +19,11 @@ export class KPdfGenerator extends OutputGenerator {
 
     async prepare(_params) {
         await super.prepare(_params);
+
+        // create dir tree before conversion
+        const path = this.buildPathForFs(_params.path, _params.fileSystem);
+        await _params.fileSystem.sendContent(path, '');
+
         return _params;
     }
 
