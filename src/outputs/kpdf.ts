@@ -49,9 +49,11 @@ export class KPdfGenerator extends OutputGenerator {
     async getLibInstance(params) {
         const KPDF = getClassFromImport(await import('pdfkit'));
         const instanceParams = this.buildInstanceParams(params.config);
+
         const instance = new KPDF(...instanceParams);
 
         const stream = instance.pipe(createWriteStream(params.path));
+
         return { instance, stream };
     }
 

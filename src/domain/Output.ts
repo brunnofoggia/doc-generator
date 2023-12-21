@@ -16,16 +16,16 @@ export class OutputDomain extends DomainOptionsUtil {
 
     async setConfig(config: Partial<OutputConfig>) {
         this.config = config;
-        await this.outputFactory();
+        this.instance = await OutputDomain.outputFactory(this.config);
     }
 
-    async outputFactory(): Promise<OutputGenerator> {
-        const _class = await this.defineTemplateClass();
-        return (this.instance = new _class());
+    static async outputFactory(config): Promise<OutputGenerator> {
+        const _class = await this.defineTemplateClass(config);
+        return new _class();
     }
 
-    async defineTemplateClass() {
-        const type = this.readType();
+    static async defineTemplateClass(config) {
+        const type = this.readType(config);
         const ext = /\.js$/.test(__filename) ? '.js' : '.ts';
 
         let _import;
@@ -44,6 +44,10 @@ export class OutputDomain extends DomainOptionsUtil {
         }
         const _class = getClassFromImport(_import);
         return _class;
+    }
+
+    static readType(config) {
+        return config.outputType ? config.outputType.toUpperCase() : OutputType.PLAIN;
     }
 
     readType() {
