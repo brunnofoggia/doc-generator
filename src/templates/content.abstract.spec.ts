@@ -1,7 +1,5 @@
 import { DataSource } from 'typeorm';
-import { DeepPartial } from 'node-common/dist/types/deepPartial';
-import { faker } from '@faker-js/faker';
-import { sleep } from 'node-common/dist/utils';
+import { DeepPartial } from '../common/types/deepPartial';
 
 import { DatabaseConnect } from '@test/utils/connect';
 import { projectUid, templateConfigList } from '@test/mock/entities/templateConfig';

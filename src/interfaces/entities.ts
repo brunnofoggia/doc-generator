@@ -1,4 +1,4 @@
-import { ObjectLiteral } from 'node-common/dist/types/objectLiteral';
+import { ObjectLiteral } from '../common/types/objectLiteral';
 
 import { TemplateType } from '../types/template';
 

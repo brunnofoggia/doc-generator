@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { sleep } from 'node-common/dist/utils';
+import { sleep } from '../../../src/common/utils';
 
 export const userHeader = ['Id', 'Name', 'Email', 'Birth', 'Savings'];
 

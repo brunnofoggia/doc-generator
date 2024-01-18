@@ -1,4 +1,4 @@
-import { ObjectLiteral } from 'node-common/dist/types/objectLiteral';
+import { ObjectLiteral } from '../common/types/objectLiteral';
 import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
 
 import { TemplateGenerator } from '../templates/template.abstract';

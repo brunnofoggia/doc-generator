@@ -1,5 +1,5 @@
 import { omit, sortBy } from 'lodash';
-import { ObjectLiteral } from 'node-common/dist/types/objectLiteral';
+import { ObjectLiteral } from '../common/types/objectLiteral';
 
 import { TemplateContentInterface } from '../interfaces/entities';
 import { TemplateType } from '../types/template';

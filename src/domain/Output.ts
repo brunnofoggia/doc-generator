@@ -2,7 +2,7 @@ import { DomainOptionsUtil } from '../utils/DomainOptions';
 import { OutputType } from '../types/output';
 import { OutputGenerator } from '../outputs/output.abstract';
 import { OutputGenerateParams } from '../interfaces/domain';
-import { getClassFromImport } from 'node-common/dist/utils';
+import { getClassFromImport } from '../common/utils';
 
 interface OutputConfig {
     outputType: OutputType;

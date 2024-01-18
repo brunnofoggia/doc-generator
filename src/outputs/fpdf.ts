@@ -1,6 +1,5 @@
 import { OutputType } from '../types/output';
-import { OutputGenerateParams } from '../interfaces/domain';
-import { getClassFromImport } from 'node-common/dist/utils';
+import { getClassFromImport } from '../common/utils';
 import { createWriteStream } from 'fs';
 import KPdfGenerator from './kpdf';
 

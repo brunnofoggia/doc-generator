@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { DeepPartial } from 'node-common/dist/types/deepPartial';
+import { DeepPartial } from '../common/types/deepPartial';
 import { each, size, isArray, defaultsDeep } from 'lodash';
 import { TextStreamUtil } from 'cloud-solutions/dist/local/storage/textStreamUtil';
 

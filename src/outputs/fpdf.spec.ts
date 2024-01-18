@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { DeepPartial } from 'node-common/dist/types/deepPartial';
+import { DeepPartial } from '../common/types/deepPartial';
 import { DatabaseConnect } from '@test/utils/connect';
 import { projectUid } from '@test/mock/entities/templateConfig';
 import { TemplateService } from '@test/services/template.service';

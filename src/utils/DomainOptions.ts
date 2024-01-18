@@ -1,5 +1,5 @@
 import { cloneDeep, defaultsDeep, each } from 'lodash';
-import { DeepPartial } from 'node-common/dist/types/deepPartial';
+import { DeepPartial } from '../common/types/deepPartial';
 
 import { DomainOptions } from '../interfaces/domain';
 

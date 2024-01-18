@@ -1,6 +1,7 @@
 import { defaultsDeep, size, cloneDeep } from 'lodash';
-import { DeepPartial } from 'node-common/dist/types/deepPartial';
-import { ObjectLiteral } from 'node-common/dist/types/objectLiteral';
+
+import { DeepPartial } from '../common/types/deepPartial';
+import { ObjectLiteral } from '../common/types/objectLiteral';
 
 import { DomainOptions } from '../interfaces/domain';
 import { TemplateDomain } from './Template';

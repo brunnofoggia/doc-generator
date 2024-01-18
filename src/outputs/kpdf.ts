@@ -4,7 +4,7 @@ const debug = debug_('app:docs:KPdfGenerator');
 import { isArray } from 'lodash';
 import { createWriteStream } from 'fs';
 
-import { getClassFromImport } from 'node-common/dist/utils';
+import { getClassFromImport } from '../common/utils';
 
 import { OutputGenerator } from './output.abstract';
 import { OutputType } from '../types/output';
@@ -52,7 +52,10 @@ export class KPdfGenerator extends OutputGenerator {
     }
 
     async getLibInstance(params) {
-        const KPDF = getClassFromImport(await import('pdfkit'));
+        // useful for switching between pdfkit and pdfkit-table
+        const libName = params.config.libName || 'pdfkit';
+
+        const KPDF = getClassFromImport(await import(libName));
         const instanceParams = this.buildInstanceParams(params.config);
 
         const instance = new KPDF(...instanceParams);
