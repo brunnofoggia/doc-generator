@@ -1,6 +1,6 @@
 {
     "name": "docs-handler",
-    "version": "0.12.0",
+    "version": "0.12.1",
     "description": "",
     "license": "ISC",
     "author": "Bruno Foggia",
@@ -8,7 +8,7 @@
     "types": "lib/index.d.ts",
     "scripts": {
         "husky:install": "husky install",
-        "exec:kms": "cross-env IS_TS_NODE=true ts-node -r tsconfig-paths/register test/kms",
+        "exec:kms": "IS_TS_NODE=true ts-node -r tsconfig-paths/register test/kms",
         "prebuild": "rimraf lib",
         "build": "tsc -p ./tsconfig.build.json",
         "lint": "eslint \"{src,apps,libs}/**/*.+(js|json|ts|tsx)\" --fix",
@@ -29,7 +29,6 @@
         "@typescript-eslint/parser": "^5.54.0",
         "axios": "^1.4.0",
         "commitlint": "^17.5.0",
-        "cross-env": "^7.0.3",
         "cz-conventional-changelog": "^3.3.0",
         "dotenv": "^16.0.3",
         "eslint": "^8.39.0",
