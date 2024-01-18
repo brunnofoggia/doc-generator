@@ -1,3 +1,6 @@
+import { unlink } from 'fs';
+
+import { getClassFromImport } from '../common/utils';
 import { OutputGenerateParams } from '../interfaces/domain';
 import { OutputType } from '../types/output';
 
@@ -30,5 +33,25 @@ export abstract class OutputGenerator {
 
     buildPathForFs(path, fs) {
         return path.substr(fs.options.baseDir.length + 1);
+    }
+
+    async dynamicImport(libName, config) {
+        const { libNamedImport = 'default' } = config;
+        const import_ = await import(libName);
+        const result = getClassFromImport(import_, libNamedImport);
+
+        return result;
+    }
+
+    removeFile(path) {
+        return new Promise((resolve, reject) => {
+            unlink(path, (err) => {
+                if (err) {
+                    reject(err);
+                }
+
+                resolve(true);
+            });
+        });
     }
 }

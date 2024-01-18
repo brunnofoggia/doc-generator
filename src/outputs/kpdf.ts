@@ -1,14 +1,14 @@
 import debug_ from 'debug';
-const debug = debug_('app:docs:KPdfGenerator');
+// const log = debug_('app:docs:KPdfGenerator');
+const debug = debug_('debug:docs:KPdfGenerator');
+// const debug = debug_('app:docs:KPdfGenerator');
 
-import { isArray } from 'lodash';
+import { isArray, random } from 'lodash';
 import { createWriteStream } from 'fs';
-
-import { getClassFromImport } from '../common/utils';
 
 import { OutputGenerator } from './output.abstract';
 import { OutputType } from '../types/output';
-import { OutputGenerateParams } from '../interfaces/domain';
+import { FileSystem, OutputGenerateParams } from '../interfaces/domain';
 
 // const defaultConfig: Partial<any> = {};
 
@@ -20,9 +20,15 @@ export class KPdfGenerator extends OutputGenerator {
     async prepare(_params) {
         await super.prepare(_params);
 
+        const emptyFile = _params.path.replace('output.pdf', '.empty');
+        // random path implemented to solve problem when generating same file many times
+        const filename = [new Date().getTime(), random(1000, 9999)].join('-') + '.pdf';
+        _params.path = _params.path.replace('output.pdf', filename);
+
         // create dir tree before conversion
-        const path = this.buildPathForFs(_params.path, _params.fileSystem);
-        await _params.fileSystem.sendContent(path, '');
+        const emptyFilePath = this.buildPathForFs(emptyFile, _params.fileSystem);
+        await _params.fileSystem.sendContent(emptyFilePath, '');
+        debug('creating empty file is ok');
 
         return _params;
     }
@@ -34,9 +40,17 @@ export class KPdfGenerator extends OutputGenerator {
 
     async conversion(params) {
         const { instance: pdf, stream } = await this.getLibInstance(params);
+        debug('pdf instance is ok');
 
+        debug('building from content');
         await this.buildFromContent(params.content, pdf, params);
+        debug('building from content is ok');
+
+        debug('saving pdf');
         await this.savePdf(pdf, params, stream);
+        debug('saving pdf is ok');
+
+        await params.content.input.close();
 
         return { path: params.path };
     }
@@ -54,10 +68,9 @@ export class KPdfGenerator extends OutputGenerator {
     async getLibInstance(params) {
         // useful for switching between pdfkit and pdfkit-table
         const libName = params.config.libName || 'pdfkit';
+        const KPDF = await this.dynamicImport(libName, params.config);
 
-        const KPDF = getClassFromImport(await import(libName));
         const instanceParams = this.buildInstanceParams(params.config);
-
         const instance = new KPDF(...instanceParams);
 
         const stream = instance.pipe(createWriteStream(params.path));
@@ -66,8 +79,15 @@ export class KPdfGenerator extends OutputGenerator {
     }
 
     async buildFromContent(content, pdf, params) {
+        let c = 0;
         for await (const line of content) {
             await this.buildLine(line, pdf, params);
+            c++;
+        }
+
+        if (!c) {
+            await this.removeFile(params.path);
+            throw new Error('read stream failed');
         }
     }
 
@@ -75,9 +95,10 @@ export class KPdfGenerator extends OutputGenerator {
         const { method, args } = this.buildLineOptions(line);
         if (!method) return;
         if (!pdf[method]) {
-            throw new Error(['template error at method;', 'line:', line, 'method name', method].join(' '));
+            throw new Error(['template error at method;', 'method name', method, 'line:', line].join(' '));
         }
 
+        debug('line length', line.length, 'method', method, 'args.length', args.length);
         await pdf[method](...(args || []));
     }
 
@@ -110,10 +131,10 @@ export class KPdfGenerator extends OutputGenerator {
 
     savePdf(pdf, params, stream = null) {
         return new Promise((resolve) => {
-            stream.on('finish', function () {
-                resolve({});
-            });
             this._savePdf(pdf);
+            stream.on('close', () => {
+                resolve(true);
+            });
         });
     }
 

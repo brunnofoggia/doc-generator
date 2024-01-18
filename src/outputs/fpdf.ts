@@ -9,7 +9,9 @@ export class FPdfGenerator extends KPdfGenerator {
     protected baseType = OutputType.FPDF;
 
     async getLibInstance(params) {
-        const FPDF = getClassFromImport(await import('node-fpdf'));
+        const libName = params.config.libName || 'node-fpdf';
+        const FPDF = await this.dynamicImport(libName, params.config);
+
         const instanceParams = this.buildInstanceParams(params.config);
 
         const instance = new FPDF(...instanceParams);
