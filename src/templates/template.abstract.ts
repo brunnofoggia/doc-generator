@@ -97,10 +97,16 @@ export abstract class TemplateGenerator {
     }
 
     async generateWithOutput(template, data, stream, outputs) {
-        const output = {};
-        const input = { data: omit(data, 'root'), ...(data.root || {}), output, outputs };
+        const templateName = template.getName();
+        if (!outputs[templateName]) outputs[templateName] = {};
+        const output = outputs[templateName];
+
+        const input = { data: omit(data, 'root'), ...(data.root || {}), output, outputs, shared: outputs['__shared'], templateName };
+
         await template.generate(input, stream);
-        outputs[template.getName()] = output;
+
+        outputs[templateName] = output;
+        // output
         return output;
     }
 

@@ -103,7 +103,10 @@ export class TemplateDomain extends DomainOptionsUtil {
     }
 
     async generateAll(templates: TemplateGenerator[], data, stream: WriteStreamInterface) {
-        const outputs: any = {};
+        const outputs: any = {
+            // shared object among templates
+            __shared: {},
+        };
         for (const template of templates) {
             await template.generateRecursively(data, stream, outputs);
         }

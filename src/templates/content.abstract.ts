@@ -6,23 +6,24 @@ import { TemplateGenerator } from './template.abstract';
 
 export abstract class ContentGenerator extends TemplateGenerator {
     protected compiled: any;
-    protected static ejsOptions = {
+    protected static ejsConfig = {
         async: true,
     };
-    protected ejsOptions: any;
+    protected ejsConfig: any;
 
     buildEjsOptions() {
-        if (!this.ejsOptions)
-            this.ejsOptions = defaults(this.data.config.ejsConfig || {}, this.globalConfig.ejsOptions || {}, ContentGenerator.ejsOptions);
+        if (!this.ejsConfig) {
+            this.ejsConfig = defaults(this.data.config.ejsConfig || {}, this.globalConfig.ejsConfig || {}, ContentGenerator.ejsConfig);
+        }
     }
 
     async validate() {
         this.buildEjsOptions();
-        this.compiled = await this._validate(this.data.content, this.ejsOptions);
+        this.compiled = await this._validate(this.data.content, this.ejsConfig);
     }
 
-    async _validate(content, ejsOptions = {}) {
-        return await ejs.compile(content, ejsOptions);
+    async _validate(content, ejsConfig = {}) {
+        return await ejs.compile(content, ejsConfig);
     }
 
     async generate(input, stream: WriteStreamInterface) {
@@ -40,7 +41,7 @@ export abstract class ContentGenerator extends TemplateGenerator {
             input.index = index++;
 
             const rendered = await this.render(input);
-            await stream.writeLine(rendered);
+            if (rendered.trim()) await stream.writeLine(rendered);
             await calculator(input);
         };
 
