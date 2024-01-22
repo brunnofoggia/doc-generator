@@ -13,6 +13,8 @@ import { OutputType } from 'types/output';
 import { findCook } from './Template.test';
 import { DatabaseOptions } from 'interfaces/domain';
 import { TemplateConfigInterface } from 'interfaces/entities';
+import { sleep } from 'common/utils';
+import { StreamType } from 'types/stream';
 
 describe('Domain > DocGenerator', () => {
     const uniqueName = 'DocGenerator';
@@ -21,6 +23,10 @@ describe('Domain > DocGenerator', () => {
     let templateConfigService: TemplateConfigService;
     let templateContentService: TemplateContentService;
     let templateConfig: TemplateConfigInterface;
+
+    let path;
+    let title;
+    let domainOptions;
     const configRelations = {
         template: 'template',
         contents: 'templateContents',
@@ -75,27 +81,59 @@ describe('Domain > DocGenerator', () => {
 
     describe('output', () => {
         it('generate plain html and output', async () => {
-            expect.assertions(1);
+            expect.assertions(2);
 
             const title = uniqueId(uniqueName);
-            await domain.generate({ title });
+            const path = await domain.generate({ title });
             const content = await domain.getGenerateContent();
 
             expect(content.indexOf(title)).toBeGreaterThan(0);
+            expect(content.indexOf('</html>')).toBeGreaterThan(0);
         });
 
-        it('generate plain html and convert to pdf', async () => {
-            expect.assertions(1);
+        it('generade html into random path', async () => {
+            expect.assertions(2);
 
-            const title = [uniqueId(uniqueName), new Date().toISOString()].join('-');
+            title = [uniqueId(uniqueName), new Date().toISOString()].join('-');
             await domain.buildTemplatesList();
 
             // customize options
-            domain.setOptions({
+            domainOptions = {
                 file: {
                     dirPath: [getDefaultOptions().file.dirPath, title].join('/'),
+                    generate: {
+                        name: 'generate.html',
+                    },
+                    output: {
+                        name: 'output.pdf',
+                    },
                 },
-            });
+            };
+
+            domain.setOptions(domainOptions);
+
+            await domain.validateTemplates();
+            const input = { title };
+
+            try {
+                const { path: path_ } = await domain.generate(input);
+                path = path_;
+
+                const content = await domain.getGenerateContent();
+
+                // await domain.output();
+                expect(content.indexOf(title)).toBeGreaterThan(0);
+                expect(content.indexOf('</html>')).toBeGreaterThan(0);
+            } catch (error) {
+                console.error('error', error);
+                console.log('stack', error.stack);
+            }
+        });
+
+        it('convert html to pdf', async () => {
+            expect.assertions(2);
+
+            domain.setOptions(domainOptions);
 
             // customize output
             domain.buildGlobalConfig(
@@ -105,13 +143,19 @@ describe('Domain > DocGenerator', () => {
                 true,
             );
 
-            await domain.validateTemplates();
-            const input = { title };
-            await domain.generate(input);
-            const content = await domain.getGenerateContent();
-            await domain.output();
+            const streamTypeGen = StreamType.GENERATE;
+            domain.getChild().file.setFilepath(streamTypeGen);
+            await domain.getChild().file.setFileSystem(streamTypeGen);
 
-            expect(content.indexOf(title)).toBeGreaterThan(0);
+            const { path } = await domain.output();
+
+            const streamTypeOut = StreamType.OUTPUT;
+            const fs = await domain.getChild().file.getProperty(streamTypeOut, 'fileSystem');
+            const fsPath = domain.getChild().file.getProperty(streamTypeOut, 'filePath');
+            const content = await fs.readContent(fsPath);
+
+            expect(path.indexOf('.pdf')).toBeGreaterThan(0);
+            expect(content.indexOf('%PDF-1.')).toEqual(0);
         });
     });
 });

@@ -41,7 +41,10 @@ export abstract class ContentGenerator extends TemplateGenerator {
             input.index = index++;
 
             const rendered = await this.render(input);
-            if (rendered.trim()) await stream.writeLine(rendered);
+
+            if (rendered.trim()) {
+                await stream.writeLine(rendered);
+            }
             await calculator(input);
         };
 

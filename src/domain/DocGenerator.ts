@@ -117,7 +117,9 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
     async output() {
         const streamType = StreamType.OUTPUT;
         if (this.isOutputDiffFromGenerate()) {
-            const content = await (!this.domain.output.useContentAsStream() ? this.getGenerateContent() : this.domain.file.getGenerateReadStream());
+            const content = await (!this.domain.output.useContentAsStream()
+                ? this.getGenerateContent()
+                : this.domain.file.getGenerateReadStream());
 
             const fs = await this.domain.file.setFileSystem(streamType);
             const stream = this.domain.output.isStreamNeed() ? await this.domain.file.getStream(streamType) : null;
@@ -155,7 +157,6 @@ export class DocGeneratorDomain extends DomainOptionsUtil {
     }
 
     getOutputPath() {
-        const streamType = StreamType.OUTPUT;
-        return this.getPath(streamType);
+        return this.getPath(StreamType.OUTPUT);
     }
 }

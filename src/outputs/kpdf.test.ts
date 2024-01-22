@@ -1,5 +1,6 @@
 import { FileDomain } from '../domain/File';
 import { uniqueId } from 'lodash';
+import { Interface as ReadLineInterface } from 'readline';
 
 export async function generate({ uniqueName, domain }) {
     const title = uniqueId(uniqueName);
@@ -15,7 +16,7 @@ export async function generate({ uniqueName, domain }) {
 export async function output({ domain }) {
     const { path } = await domain.output();
     const fs = await FileDomain.getLocalFileSystem();
-    const stream = await fs.readStream(path.substring(fs.getOptions().baseDir.length + 1));
+    const stream = (await fs.readStream(path.substring(fs.getOptions().baseDir.length + 1))) as ReadLineInterface;
 
     let line = '';
     for await (const line_ of stream) {

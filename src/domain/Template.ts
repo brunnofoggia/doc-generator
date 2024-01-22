@@ -3,7 +3,12 @@ import { ObjectLiteral } from '../common/types/objectLiteral';
 import { WriteStreamInterface } from 'cloud-solutions/dist/common/interfaces/writeStream.interface';
 
 import { TemplateObjectListInterface } from '../interfaces/domain';
-import { TemplateConfigInterface, TemplateContentInterface, TemplateContentObjectListInterface, TemplateInterface } from '../interfaces/entities';
+import {
+    TemplateConfigInterface,
+    TemplateContentInterface,
+    TemplateContentObjectListInterface,
+    TemplateInterface,
+} from '../interfaces/entities';
 import { TemplateGenerator } from '../templates/template.abstract';
 import { DocGeneratorErrorType } from '../types/error';
 import { TemplateType } from '../types/template';
