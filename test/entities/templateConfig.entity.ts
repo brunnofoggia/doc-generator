@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
-import { set } from 'node-common/dist/utils/entities';
-import { GenericEntity } from 'node-common/dist/entities/generic';
+import { set } from 'node-labs/lib/utils/entities';
+import { GenericEntity } from 'node-labs/lib/entities/generic';
 
 import { TemplateEntity } from './template.entity';
 import { TemplateContentEntity } from './templateContent.entity';
