@@ -8,7 +8,7 @@ import { createWriteStream } from 'fs';
 
 import { OutputGenerator } from './output.abstract';
 import { OutputType } from '../types/output';
-import { FileSystem, OutputGenerateParams } from '../interfaces/domain';
+import { OutputGenerateParams } from '../interfaces/domain';
 
 // const defaultConfig: Partial<any> = {};
 
@@ -50,9 +50,19 @@ export class KPdfGenerator extends OutputGenerator {
         await this.savePdf(pdf, params, stream);
         debug('saving pdf is ok');
 
-        await params.content.input.close();
+        await this.closeStream(params.content.input);
 
         return { path: params.path };
+    }
+
+    closeStream(stream) {
+        return new Promise((resolve) => {
+            if (!stream.close || stream.closed) resolve({});
+            stream.close();
+            stream.on('close', () => {
+                resolve({});
+            });
+        });
     }
 
     buildInstanceParams(config) {
@@ -88,7 +98,7 @@ export class KPdfGenerator extends OutputGenerator {
         if (!c) {
             await this.removeFile(params.path);
             throw new Error('read stream failed');
-        }
+        } else debug('pdf built with', c, 'lines');
     }
 
     async buildLine(line, pdf, params) {
