@@ -1,5 +1,4 @@
 import { OutputType } from '../types/output';
-import { getClassFromImport } from '../common/utils';
 import { createWriteStream } from 'fs';
 import KPdfGenerator from './kpdf';
 

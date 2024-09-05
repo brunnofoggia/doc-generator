@@ -30,9 +30,9 @@ export class OutputDomain extends DomainOptionsUtil {
 
         let _import;
         switch (type) {
-            case OutputType.PPDF:
-                _import = await import(`../outputs/ppdf${ext}`);
-                break;
+            // case OutputType.PPDF:
+            //     _import = await import(`../outputs/ppdf${ext}`);
+            //     break;
             case OutputType.FPDF:
                 _import = await import(`../outputs/fpdf${ext}`);
                 break;

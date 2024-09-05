@@ -25,8 +25,8 @@ describe('Domain > DocGenerator', () => {
     let templateConfig: TemplateConfigInterface;
 
     let path;
-    let title;
-    let domainOptions;
+    let sharedTitle;
+    let sharedDomainOptions;
     const configRelations = {
         template: 'template',
         contents: 'templateContents',
@@ -42,6 +42,45 @@ describe('Domain > DocGenerator', () => {
     const defaultTemplateWhere = {
         projectUid,
     };
+
+    function setCustomOptions(reset = false) {
+        if (!reset && sharedTitle && sharedDomainOptions) {
+            return;
+        }
+
+        sharedTitle = [uniqueId(uniqueName), new Date().toISOString()].join('-');
+        sharedDomainOptions = {
+            file: {
+                dirPath: [getDefaultOptions().file.dirPath, sharedTitle].join('/'),
+                generate: {
+                    name: 'generate.html',
+                },
+                output: {
+                    name: 'output.pdf',
+                },
+            },
+        };
+    }
+    setCustomOptions(true);
+
+    async function htmlGenerate() {
+        await domain.buildTemplatesList();
+        domain.setOptions(sharedDomainOptions);
+
+        await domain.validateTemplates();
+        const input = { title: sharedTitle };
+
+        try {
+            const { path: path_ } = await domain.generate(input);
+            path = path_;
+
+            const content = await domain.getGenerateContent();
+            return { path, content, domain };
+        } catch (error) {
+            console.error('error', error);
+            console.log('stack', error.stack);
+        }
+    }
 
     beforeAll(async () => {
         conn = await DatabaseConnect();
@@ -91,38 +130,12 @@ describe('Domain > DocGenerator', () => {
             expect(content.indexOf('</html>')).toBeGreaterThan(0);
         });
 
-        it('generade html into random path', async () => {
+        it('generate html into random path', async () => {
             expect.assertions(2);
 
-            title = [uniqueId(uniqueName), new Date().toISOString()].join('-');
-            await domain.buildTemplatesList();
-
-            // customize options
-            domainOptions = {
-                file: {
-                    dirPath: [getDefaultOptions().file.dirPath, title].join('/'),
-                    generate: {
-                        name: 'generate.html',
-                    },
-                    output: {
-                        name: 'output.pdf',
-                    },
-                },
-            };
-
-            domain.setOptions(domainOptions);
-
-            await domain.validateTemplates();
-            const input = { title };
-
             try {
-                const { path: path_ } = await domain.generate(input);
-                path = path_;
-
-                const content = await domain.getGenerateContent();
-
-                // await domain.output();
-                expect(content.indexOf(title)).toBeGreaterThan(0);
+                const { content } = await htmlGenerate();
+                expect(content.indexOf(sharedTitle)).toBeGreaterThan(0);
                 expect(content.indexOf('</html>')).toBeGreaterThan(0);
             } catch (error) {
                 console.error('error', error);
@@ -130,32 +143,32 @@ describe('Domain > DocGenerator', () => {
             }
         });
 
-        it('convert html to pdf', async () => {
-            expect.assertions(2);
+        // TODO: change to convert functions to pdf
+        // it.only('convert html to pdf', async () => {
+        //     expect.assertions(2);
+        //     const { content: html, domain } = await htmlGenerate();
 
-            domain.setOptions(domainOptions);
+        //     // customize output
+        //     domain.buildGlobalConfig(
+        //         {
+        //             outputType: OutputType.PPDF,
+        //         },
+        //         true,
+        //     );
 
-            // customize output
-            domain.buildGlobalConfig(
-                {
-                    outputType: OutputType.PPDF,
-                },
-                true,
-            );
+        //     const streamTypeGen = StreamType.GENERATE;
+        //     domain.getChild().file.setFilepath(streamTypeGen);
+        //     await domain.getChild().file.setFileSystem(streamTypeGen);
 
-            const streamTypeGen = StreamType.GENERATE;
-            domain.getChild().file.setFilepath(streamTypeGen);
-            await domain.getChild().file.setFileSystem(streamTypeGen);
+        //     const { path } = await domain.output();
 
-            const { path } = await domain.output();
+        //     const streamTypeOut = StreamType.OUTPUT;
+        //     const fs = await domain.getChild().file.getProperty(streamTypeOut, 'fileSystem');
+        //     const fsPath = domain.getChild().file.getProperty(streamTypeOut, 'filePath');
+        //     const content = await fs.readContent(fsPath);
 
-            const streamTypeOut = StreamType.OUTPUT;
-            const fs = await domain.getChild().file.getProperty(streamTypeOut, 'fileSystem');
-            const fsPath = domain.getChild().file.getProperty(streamTypeOut, 'filePath');
-            const content = await fs.readContent(fsPath);
-
-            expect(path.indexOf('.pdf')).toBeGreaterThan(0);
-            expect(content.indexOf('%PDF-1.')).toEqual(0);
-        });
+        //     expect(path.indexOf('.pdf')).toBeGreaterThan(0);
+        //     expect(content.indexOf('%PDF-1.')).toEqual(0);
+        // });
     });
 });
